@@ -1,0 +1,20 @@
+[Unit]
+Description=每 10 分钟清理泄漏的沙箱容器
+Documentation=file:/opt/sandbox-executor/sandbox-prune.service
+
+[Timer]
+Unit=sandbox-prune.service
+
+# OnBootSec 存在的理由：executor 启动时自己会跑一次 reaper，但**如果 executor 没
+# 起来**（配置写错、镜像缺失、docker 挂了），泄漏的容器就没人清 —— 这个 timer 是
+# 独立于 executor 的第二条腿。
+OnBootSec=10min
+OnUnitActiveSec=10min
+
+# until=10m 的过滤器（在 service 里）与这个周期必须匹配：周期若短于
+# SANDBOX_MAX_TIMEOUT + SANDBOX_STARTUP_GRACE，就可能删掉正在跑的容器。
+# 改这里之前先看 sandbox-prune.service 里的那段说明。
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

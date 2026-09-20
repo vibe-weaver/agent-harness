@@ -1,0 +1,72 @@
+# ══════════════════════════════════════════════════════════
+#  第一道红线：环境变量与密钥，永远不要提交
+# ══════════════════════════════════════════════════════════
+.env
+.env.local
+.env.*.local
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+ENV/
+
+# ── 运行时数据 ──
+# 工作区临时文件、上传缓存、日志等（技能库除外，见下方）
+backend/data/*
+!backend/data/skills/
+
+# ── 技能库内的密钥与运行时状态（开源红线）──
+# 技能目录本身要入库（SKILL.md / scripts），但密钥文件、健康状态、产物绝不能进
+backend/data/skills/**/secrets.yaml
+backend/data/skills/**/secrets.web.yaml
+backend/data/skills/**/secrets.*.yaml
+backend/data/skills/**/state/
+backend/data/skills/**/outputs/
+backend/data/skills/**/config/models.web.yaml
+
+*.log
+*.db
+*.sqlite3
+server.out
+server.err
+server.log
+
+# ── 前端 ──
+frontend/dist/
+frontend/node_modules/
+node_modules/
+.vite/
+vite-output.txt
+
+# ── 测试与临时文件 ──
+.pytest_cache/
+.coverage
+htmlcov/
+_check/
+_jscheck*/
+
+# ── 编辑器与系统 ──
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── 沙箱执行器（可选组件）的运行产物 ──
+sandbox-executor/__pycache__/
+sandbox-executor/*.log
+
+# ── 本地工作记录（不入库）──
+# .workbuddy/ 存 Agent 的工作记忆与临时脚本，含本机路径、调试凭据等内部信息
+.workbuddy/
+# 开源前的敏感信息审计报告：含生产路径、内网架构、端口等部署拓扑
+docs/security-audit*.md

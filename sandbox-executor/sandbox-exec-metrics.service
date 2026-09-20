@@ -1,0 +1,35 @@
+[Unit]
+Description=沙箱 exec.jsonl 指标聚合与告警（服务器 B，每小时）
+Documentation=file:/opt/blog/docs/deployment-sandbox.md
+
+# 只是读日志文件 + 可选出网 POST webhook，不需要 docker。
+
+[Service]
+Type=oneshot
+User=sandboxexec
+Group=sandboxexec
+
+# 可选的 webhook 配置放单独的文件（只有 SANDBOX_ALERT_WEBHOOK 一个键）。
+# 刻意不复用 /etc/sandbox-executor/executor.env：那个文件里有 SANDBOX_TOKEN，
+# "不需要令牌的脚本不去读持有令牌的配置"应该是默认姿态，哪怕同用户。
+# 前缀 - ：文件不存在不报错（不配 webhook 是合法的常态）。
+EnvironmentFile=-/etc/sandbox-executor/metrics.env
+
+WorkingDirectory=/opt/sandbox-executor
+ExecStart=/opt/sandbox-executor/env/bin/python /opt/sandbox-executor/exec_metrics.py --window 24
+
+# 退出码 1（有 ALERT）时 systemd 会把本单元标成 failed，systemctl --failed
+# 一眼可见；人类可读的指标进 stdout → journal。
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sandbox-exec-metrics
+
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+
+# 刻意没有 [Install] 段：本单元由 sandbox-exec-metrics.timer 触发，
+# 单独 enable 它只会在开机时多跑一次，与 timer 的周期语义混淆。

@@ -1,0 +1,21 @@
+[Unit]
+Description=每小时聚合沙箱 exec.jsonl 指标并按阈值告警
+Documentation=file:/opt/sandbox-executor/sandbox-exec-metrics.service
+
+[Timer]
+Unit=sandbox-exec-metrics.service
+
+# OnBootSec：开机后先等 15 分钟再跑第一次 —— 窗口是 24h 滚动的，开机头几分钟
+# 的数据没有任何代表性，还会和 executor 的启动日志抢 I/O。
+OnBootSec=15min
+OnUnitActiveSec=1h
+
+# 指标看的是趋势不是瞬时值，不需要准点。
+AccuracySec=5min
+
+# 沙箱执行的观测窗口：24h 滚动窗口每小时刷一次快照，journal 里自然留下一串
+# 可回看的历史（journalctl -u sandbox-exec-metrics --since today）。
+Persistent=true
+
+[Install]
+WantedBy=timers.target

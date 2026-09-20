@@ -1,0 +1,91 @@
+[Unit]
+Description=sandbox-executor：收脚本 → docker run → NDJSON 流回后端
+Documentation=file:/opt/sandbox-executor/DEPLOY.md
+
+# docker.service：executor 的一切都要通过 docker CLI。用 Wants 而不是 Requires ——
+# docker 重启时不该把 executor 一起拖下去（executor 的 reaper 会在下次启动时清场，
+# 运行期 docker 不可用则由 /healthz 报 docker_version=null 让 A 侧看见）。
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+# fstab 里的两个 NFS 挂载必须先就位。没有这一行，开机时 executor 可能在挂载完成前
+# 起来，于是 /healthz 一直 503 到探测缓存过期 —— 而且日志里看不出是启动顺序问题。
+RequiresMountsFor=/mnt/blog-ws /mnt/blog-skills
+
+# docker 重启可能要十几秒，默认的 10s/5 次限流会让 executor 直接放弃重启。
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+# uvicorn 不发 sd_notify，所以必须是 simple。写成 notify 会让 systemd 一直等
+# READY=1 直到超时而判定启动失败。
+Type=simple
+
+# docker 组等于 root（能把任意宿主路径挂进容器），所以这里降权挡不住 docker 本身，
+# 挡的是**其余一切**：sandboxexec 读不到 /etc/shadow、写不了 /opt/blog、拿不到 A 的
+# 任何东西。真正收缩 docker 这块攻击面的是"只暴露一个固定镜像固定参数的 HTTP 端点"
+# 这个设计，不是这里的 User=。
+User=sandboxexec
+Group=sandboxexec
+SupplementaryGroups=docker
+
+EnvironmentFile=/etc/sandbox-executor/executor.env
+WorkingDirectory=/opt/sandbox-executor
+ExecStart=/opt/sandbox-executor/env/bin/python /opt/sandbox-executor/executor.py
+
+# executor 的诊断信息全部 print 到 stderr（含 require_nfs=0 的大字警告、启动时的
+# 镜像/挂载点回显、未处理异常）。不设为 unbuffered 的话这些在 journal 里会滞后，
+# 排查"为什么起不来"时看到的顺序是乱的。
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONUTF8=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sandbox-executor
+
+Restart=on-failure
+RestartSec=3s
+
+# ── 资源优先级 ────────────────────────────────────────────────────────────────
+# 不要用降 --cpus 的办法给 sshd 让路：--cpus 0.8 只是让沙箱变慢，不会让出优先级，
+# 争抢时 sshd 照样卡。用 systemd 权重让争抢自然倾斜。
+CPUWeight=200
+Nice=-5
+# Nice=-5 需要 CAP_SYS_NICE。systemd 在 setuid 之前设 nice，理论上非 root 也能
+# 生效，但那依赖具体版本的执行顺序；显式给上 ambient capability，把"理论上"变成
+# 确定的。**只给这一个**，别顺手加别的。
+AmbientCapabilities=CAP_SYS_NICE
+
+# ── 沙箱化 ────────────────────────────────────────────────────────────────────
+# 用 full 而不是 strict：strict 会把整个文件层级（含 /mnt 下的 NFS 挂载）以只读
+# bind 覆盖一遍，而 NFS 是 hard 挂载 —— 挂载点在 A 侧不可达时，namespace 的构建
+# 本身就可能阻塞，把"执行被拒绝"升级成"服务起不来"，还更难诊断。executor 对
+# /mnt 只做读（is_dir 检查 + 读哨兵文件），full 保护的 /usr /boot /etc 才是有价值
+# 的那部分。
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+# AF_UNIX = /var/run/docker.sock；AF_INET/AF_INET6 = 监听 8787。executor 自己不出网。
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# 刻意不加 MemoryDenyWriteExecute：本机没有容器运行时也没法验证 B 上的行为，
+# 一个装上去就可能让服务起不来、又无法在此处验证的加固项不是好交易。
+
+# 停服时只有主进程收到 SIGTERM，好让 lifespan 的关闭钩子把在跑的沙箱容器
+# docker rm -f 掉（那是唯一真正能停住容器的手段，杀 docker run 客户端没用）。
+# 默认的 control-group 会同时给子进程发信号，反而干扰这个清理。
+KillMode=mixed
+# 关闭钩子里的 reaper 要逐个 docker rm -f；给足时间，别让它被 SIGKILL 打断后
+# 留下一堆泄漏容器等下次启动清理。
+TimeoutStopSec=90
+
+# 审计日志目录。logrotate 见 sandbox-executor.logrotate。
+ReadWritePaths=/var/log/sandbox-executor
+
+[Install]
+WantedBy=multi-user.target

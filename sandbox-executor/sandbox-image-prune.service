@@ -1,0 +1,26 @@
+[Unit]
+Description=清理旧版本沙箱镜像，只保留在用的那个
+Documentation=file:/opt/sandbox-executor/sandbox-image-prune.sh
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=sandboxexec
+Group=sandboxexec
+SupplementaryGroups=docker
+
+# 脚本自己从 EnvironmentFile 里 sed 出 SANDBOX_IMAGE 来决定保留哪个。
+# 不用 systemd 的 EnvironmentFile= 传进来：那样脚本在**手工执行**时（排查时一定会
+# 手工跑一次）会因为环境变量缺失而走进"拒绝清理"分支，行为与 timer 触发时不一致。
+ExecStart=/opt/sandbox-executor/sandbox-image-prune.sh
+
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+
+# 刻意没有 [Install] 段：由 sandbox-image-prune.timer 触发，见 sandbox-prune.service
+# 里同一条说明。

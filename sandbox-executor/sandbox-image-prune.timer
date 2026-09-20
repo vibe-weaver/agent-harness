@@ -1,0 +1,25 @@
+[Unit]
+Description=每周清理旧版本沙箱镜像
+Documentation=file:/opt/sandbox-executor/sandbox-image-prune.sh
+
+[Timer]
+Unit=sandbox-image-prune.service
+
+# weekly = 周一 00:00。换成显式的 OnCalendar 而不是"每周"这种模糊说法，
+# 是为了让 `systemctl list-timers` 里看到的下次执行时间可预期。
+OnCalendar=Mon *-*-* 04:30:00
+
+# 04:30 而不是 00:00：躲开 A 侧的每日任务清理与数据库备份窗口（它们都在午夜），
+# 也躲开日志轮转。镜像清理会有一小段 IO 峰值。
+#
+# B 上只跑沙箱，理论上没有午夜任务；但 NFS 的另一头是 A，A 忙的时候 B 的容器
+# 读写工作区也会跟着慢，所以还是错开。
+AccuracySec=15min
+RandomizedDelaySec=10min
+
+# 关机期间错过了就开机补跑一次。镜像清理不像容器清理那样有时间敏感性，
+# 但一台长期不重启的机器如果又恰好每次周一 04:30 都在维护，磁盘就会被慢慢吃满。
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,108 @@
+# ============================================================================
+# media-router 模型池配置
+# ----------------------------------------------------------------------------
+# 这是你唯一需要长期维护的文件。改完直接生效，不用重启任何东西。
+#
+# 初始状态模型池为空 —— 用 `media_router.py web` 在网页上添加，
+# 或参考下面的注释示例手写。想看各平台的完整写法见 references/providers.md。
+#
+# 三个核心字段的语义：
+#   priority  优先级档位，数值越小越优先。priority=1 的模型永远压过 priority=2。
+#   weight    同一 priority 档位内的权重，决定"被抽中的概率"。
+#             权重 50 和 30 在同一档里，就是 50/80 与 30/80 的出手比例。
+#   supports  能力标签，路由时按需过滤。
+#             图片: text2img / img2img     视频: text2video / img2video
+#
+# strategy 三种取值：
+#   priority_then_weight  先分档，同档内按 weight 加权随机（默认，推荐）
+#   weight_only           忽略 priority，全部按 weight 加权随机
+#   fallback_chain        严格按 (priority, weight) 排序，不随机（适合贵的视频）
+#
+# ⚠️ YAML 的引号规则（踩过坑，一定要看）：
+#   下面这几类值**必须加引号**，否则读出来的东西不是你想的那个：
+#     * 占位符：   "{{prompt}}"      —— 裸写会被当成行内映射
+#     * 比值/时间： "16:9" "1:1" "12:30"
+#       裸写的 1:1 会被 YAML 当成**六十进制整数 61**（这是 YAML 1.1 的规定），
+#       等于把 61 发给接口。这条最阴，因为它不报错，只是悄悄变错。
+#     * 日期：     "2026-01-01"      —— 裸写会被读成 date 对象
+#     * 带「冒号+空格」的文本： "重要: 别删"
+#   拿不准就一律加引号，加了永远没错。
+#   程序会在加载时做一次原文体检，发现问题会出现在 config / list 命令的
+#   warnings 里，网页配置页顶部也会提示。
+# ============================================================================
+
+version: 1
+
+defaults:
+  # 单次 HTTP 请求超时（秒）
+  timeout_seconds: 120
+  # 异步任务的轮询间隔（秒）
+  poll_interval_seconds: 5
+  # 异步任务最长等待（秒），超时即判定该模型失败并降级
+  max_poll_seconds: 900
+  # 单次 generate 最多尝试几个候选模型（失败后自动换下一个）
+  max_attempts: 2
+  # 产物落盘目录。null = <skill>/outputs
+  output_dir: null
+  # 熔断状态目录。null = <skill>/state
+  state_dir: null
+
+  # 熔断策略：某模型连续失败 failure_threshold 次后，进入 cooldown_seconds 冷却
+  health:
+    failure_threshold: 3
+    cooldown_seconds: 300
+
+  # 结果回传时的文字描述（让纯文本模型也能"读懂"产物）
+  #   mode: off       不回描述，只给元数据
+  #         metadata  只给结构化元数据（宽高/时长/大小），零成本
+  #         vlm       额外调用视觉模型产出一句话描述 ← 推荐，能真正接住任务
+  caption:
+    mode: metadata
+    endpoint: https://api.openai.com/v1/chat/completions
+    model: ""
+    api_key_env: OPENAI_API_KEY
+    prompt: "用一两句中文客观描述这张图片：主体内容、风格、构图与配色。"
+
+# ---------------------------------------------------------------------------
+# 图片模型池 —— 初始为空，往 models: 下面加条目即可
+# ---------------------------------------------------------------------------
+image:
+  strategy: priority_then_weight
+  models: []
+# 示例（完整写法见 references/providers.md）：
+# image:
+#   strategy: priority_then_weight
+#   models:
+#     - id: my-image-model            # 唯一 id，自己起
+#       provider: openai              # 适配器类型（openai/dashscope/volcengine/…）
+#       model: cogview-4              # 平台里的模型名
+#       priority: 1
+#       weight: 50
+#       enabled: true
+#       supports: [text2img]          # 需要图生图再加 img2img
+#       api_key_env: MY_API_KEY       # 密钥从哪个环境变量/密钥文件读
+#       # endpoint: https://…         # 可选，非默认网关才需要
+#       # params:
+#       #   size: 1024x1024
+
+# ---------------------------------------------------------------------------
+# 视频模型池 —— 初始为空
+# ---------------------------------------------------------------------------
+video:
+  strategy: priority_then_weight
+  models: []
+# 示例：
+# video:
+#   strategy: priority_then_weight
+#   models:
+#     - id: my-video-model
+#       provider: volcengine
+#       model: doubao-seedance-1-0-pro-250528
+#       priority: 1
+#       weight: 60
+#       enabled: true
+#       supports: [text2video, img2video]
+#       api_key_env: ARK_API_KEY
+#       params:
+#         ratio: "16:9"               # ⚠️ 比值必须加引号（见顶部说明）
+#         duration: 5

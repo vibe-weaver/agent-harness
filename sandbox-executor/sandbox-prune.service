@@ -1,0 +1,32 @@
+[Unit]
+Description=清理泄漏的沙箱容器（blog-sandbox-executor 的兜底）
+Documentation=file:/opt/sandbox-executor/sandbox-prune.timer
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=sandboxexec
+Group=sandboxexec
+SupplementaryGroups=docker
+
+# until=10m 是硬保证，不是保险起见。
+# executor 自己的 reaper 在启动和关闭时删掉 label=sandbox=1 的**全部**容器 ——
+# 那两个时刻不该有在跑的执行，全删是对的。而这个 timer 是每 10 分钟跑一次，
+# 可能正好撞上一次合法执行，把用户等了一分钟的任务连容器一起删掉。
+# 一次执行的最坏墙钟 = SANDBOX_MAX_TIMEOUT(120s) + SANDBOX_STARTUP_GRACE(10s)，
+# 远小于 10m，所以 until=10m 把"正常情况下撞不上"变成"结构上撞不上"。
+#
+# 只删 label=sandbox=1：B 上将来若有别的容器（监控、备份），不能被这个单元碰到。
+ExecStart=/usr/bin/docker container prune -f --filter label=sandbox=1 --filter until=10m
+
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+
+# 刻意没有 [Install] 段：本单元由 sandbox-prune.timer 触发，不该被单独 enable。
+# 带 WantedBy=multi-user.target 的话，误跑一次 `systemctl enable sandbox-prune`
+# 就会让它每次开机立刻执行，与 timer 的 OnBootSec=10min 重复。要 enable 的是 timer。

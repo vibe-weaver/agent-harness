@@ -1,0 +1,55 @@
+# ══════════════════════════════════════════════════════════
+#  Agent Harness 后端依赖
+#  Python 3.11+（开发与验证环境为 3.13）
+#
+#  安装：pip install -r requirements.txt
+# ══════════════════════════════════════════════════════════
+
+# ── Web 框架 ──
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+gunicorn==22.0.0
+
+# ── 数据库（MySQL 8）──
+sqlalchemy==2.0.35
+pymysql==1.1.1
+
+# ── 配置与数据校验 ──
+pydantic==2.9.0
+pydantic-settings==2.5.0
+
+# ── 认证（JWT + 密码哈希）──
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+
+# ── 文件上传（FastAPI multipart 表单）──
+python-multipart==0.0.9
+
+# ── HTTP 客户端（调用各厂商的 LLM API）──
+httpx==0.27.2
+
+# ── 技能系统（解析 SKILL.md 的 YAML frontmatter）──
+pyyaml==6.0.2
+
+# ── 文档生成与解析（Agent 的办公能力）──
+# 后端侧负责生成 PDF / Word / Excel，并解析上传的 PDF
+reportlab==5.0.1
+python-docx==1.2.0
+openpyxl==3.1.5
+PyMuPDF
+PyPDF2==3.0.1
+
+# ── 数据处理与图像 ──
+# 后端自身用 Pillow 处理图片；numpy/pandas/matplotlib 同时供沙箱内
+# 用户代码（run_python）使用，需保证镜像/环境中存在
+numpy>=1.26
+pandas==2.2.3
+matplotlib>=3.8
+Pillow==10.4.0
+
+# ── 可选依赖 ──
+# pdf2image：PDF 转图片的**降级路径**（PyMuPDF 不可用时才会走到）。
+# 它还需要系统级依赖 poppler-utils（apt install poppler-utils / dnf install poppler-utils）。
+# 默认不装 —— PyMuPDF 已覆盖绝大多数场景。
+# pdf2image==1.17.0

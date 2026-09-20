@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  服务器 B（沙箱执行器）的 venv 依赖。与 requirements-sandbox.txt 是两回事：
+#    requirements-sandbox.txt  → 烤进 docker 镜像，给用户代码用（26 个包）
+#    requirements-executor.txt → 装在 B 的宿主 venv 里，只跑 executor.py（HTTP 服务）
+#
+#  装法：
+#    python3 -m venv /opt/sandbox-executor/env
+#    /opt/sandbox-executor/env/bin/pip install -r requirements-executor.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 版本与开发机上跑通 172 个单元测试的环境逐字一致 —— 别用 >=，FastAPI 的路由签名
+# 解析和 starlette 的 TestClient 行为都跨小版本变过，换版本等于让测试网失效。
+fastapi==0.115.0
+uvicorn==0.30.0
+starlette==0.38.6
+pydantic==2.13.4
+anyio==4.14.2
+
+# 只有跑测试才需要（starlette.testclient.TestClient 是 httpx.Client 的子类）。
+# executor.py 运行时**不 import httpx**：B 只当服务端，客户端在 A 那边。
+httpx==0.27.2
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  刻意不装的东西（这不是瘦身，是攻击面收缩）
+#
+#  sqlalchemy / pymysql / alembic  → B 不连数据库。装上就意味着 B 被攻破后攻击者
+#                                    手里有能连 A 的 MySQL 的驱动和连接串位置线索。
+#  python-jose / passlib / bcrypt  → B 不签发也不校验 JWT。令牌比对用标准库 hmac。
+#  pandas / numpy / matplotlib /
+#  reportlab / python-docx / ...   → 这些属于**用户代码**的运行环境，只存在于容器
+#                                    镜像里。装在 B 的宿主 venv 上等于让沙箱脚本层
+#                                    要防的那些库直接跑在宿主上，纵深防御白做。
+#  gunicorn                        → 单 worker 就够（并发闸与挂载单飞都是进程内
+#                                    状态，多 worker 会把 max_concurrent 乘上去，
+#                                    直接打爆 B 的 2GB 内存）。uvicorn 自己托管。
+# ─────────────────────────────────────────────────────────────────────────────

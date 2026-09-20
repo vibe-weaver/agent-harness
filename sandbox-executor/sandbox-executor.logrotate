@@ -1,0 +1,30 @@
+# 装到 /etc/logrotate.d/sandbox-executor
+#
+# 管的是 executor 的 JSONL 审计日志。journal 那部分（executor 打到 stderr 的诊断
+# 信息）由 journald 自己的 SystemMaxUse 管，不在这里。
+
+/var/log/sandbox-executor/exec.jsonl {
+    weekly
+    rotate 6
+    # 一周内涨到 100M 就提前轮转。灰度期（阶段 4）要盯着 exit_code 分布看，
+    # 那时写入量比稳态高；6 × 100M 的最坏占用约 600MB，B 的 40GB 盘上无所谓。
+    maxsize 100M
+
+    compress
+    delaycompress
+    missingok
+    notifempty
+
+    create 0640 sandboxexec sandboxexec
+
+    # **刻意用 create 而不是 copytruncate**，也不需要 postrotate 去让进程重开句柄。
+    # AuditLog.write 每次都是 `with path.open("a") as f: f.write(...)` —— 写完立刻
+    # 关闭，executor 从不长期持有这个 fd。copytruncate 存在的唯一理由是"进程握着
+    # 一个指向被改名文件的 fd"，这里不成立；而它的代价是复制与截断之间有一个会丢
+    # 日志的窗口。用 create 就没有这个窗口：文件被改名后，下一次 write 的 open("a")
+    # 落在 logrotate 新建的那个文件上。
+    #
+    # 如果哪天把 AuditLog 改成常驻句柄（为了省掉每次 open 的开销），**必须**同时
+    # 加上 postrotate + 信号处理来重开文件，否则轮转之后的日志会全部写进已改名的
+    # 旧文件里，看上去像"审计日志突然停了"。
+}

@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<!-- PROBE-MARKER-12345 --><html lang="zh-CN" data-page-node-id="o5VY1ssyLKtEf8SBHJVvoN">
+<head data-page-node-id="tVzXV0khhG9YHpiMPVvRDj">
+<meta charset="UTF-8" data-page-node-id="vLQ8PwEfqOlydjlj9jKW7h">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="CAeSCk0cE7HUMb6FMsz9v8">
+<title>media-router 配置页面</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --line:#e4e7ec; --line-strong:#cfd4dc;
+  --text:#1f2328; --muted:#667085; --faint:#98a2b3;
+  --accent:#2563eb; --accent-soft:#eff4ff; --accent-line:#bfd3fe;
+  --ok:#0f7b52; --ok-soft:#e8f6f0;
+  --warn:#9a6700; --warn-soft:#fdf6e3;
+  --err:#b42318; --err-soft:#fdeceb;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:1.65;
+}
+.wrap{max-width:960px; margin:0 auto; padding:28px 20px 80px}
+h1{font-size:19px; font-weight:600; margin:0 0 4px}
+h2{font-size:15px; font-weight:600; margin:0 0 10px}
+h3{font-size:13px; font-weight:600; margin:0 0 8px; color:var(--muted); letter-spacing:.02em}
+p{margin:0 0 10px}
+.sub{color:var(--muted); font-size:13px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace; font-size:12px}
+header{margin-bottom:20px}
+.pathbar{
+  display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; padding:10px 12px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  color:var(--muted); font-size:12px;
+}
+.pathbar b{color:var(--text); font-weight:500}
+.tabs{display:flex; gap:4px; margin:20px 0 16px; border-bottom:1px solid var(--line)}
+.tab{
+  padding:9px 16px; border:0; background:none; cursor:pointer; font-size:14px;
+  color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; font-family:inherit;
+}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--accent); border-bottom-color:var(--accent); font-weight:500}
+.panel{display:none}
+.panel.on{display:block}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; margin-bottom:12px;
+}
+.card.tight{padding:12px 14px}
+.row{display:flex; align-items:flex-start; gap:12px; justify-content:space-between}
+.row-mid{align-items:center}
+.grow{flex:1; min-width:0}
+button{
+  font-family:inherit; font-size:13px; padding:7px 14px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--line-strong); background:#fff; color:var(--text); white-space:nowrap;
+}
+button:hover:not(:disabled){border-color:var(--faint); background:#fcfcfd}
+button:disabled{opacity:.5; cursor:not-allowed}
+button.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500}
+button.primary:hover:not(:disabled){background:#1d4ed8; border-color:#1d4ed8}
+button.danger{color:var(--err); border-color:#f2c6c2}
+button.danger:hover:not(:disabled){background:var(--err-soft)}
+button.sm{padding:4px 10px; font-size:12px}
+input,select,textarea{
+  font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--line-strong);
+  border-radius:8px; background:#fff; color:var(--text); width:100%;
+}
+input:focus,select:focus{outline:2px solid var(--accent-soft); border-color:var(--accent)}
+input[type=range]{padding:0; border:0; width:100%}
+label.lbl{display:block; font-size:13px; font-weight:500; margin:14px 0 5px}
+label.lbl:first-child{margin-top:0}
+.hint{font-size:12px; color:var(--muted); margin-top:4px}
+.field-err{font-size:12px; color:var(--err); margin-top:4px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.pick{
+  border:1px solid var(--line); border-radius:var(--radius); padding:11px 12px; cursor:pointer;
+  background:#fff; transition:border-color .12s, background .12s;
+}
+.pick:hover{border-color:var(--accent-line); background:#fbfcfe}
+.pick.on{border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 1px var(--accent)}
+.pick .t{font-weight:500; margin-bottom:3px; font-size:13px}
+.pick .d{font-size:12px; color:var(--muted); line-height:1.5}
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:500;
+  border:1px solid transparent; white-space:nowrap;
+}
+.badge.ok{background:var(--ok-soft); color:var(--ok); border-color:#bfe3d4}
+.badge.warn{background:var(--warn-soft); color:var(--warn); border-color:#f0dfae}
+.badge.err{background:var(--err-soft); color:var(--err); border-color:#f2c6c2}
+.badge.idle{background:#f2f4f7; color:var(--muted); border-color:var(--line)}
+.badge.tag{background:var(--accent-soft); color:var(--accent); border-color:var(--accent-line)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+.note{
+  font-size:12.5px; padding:9px 12px; border-radius:8px; margin:10px 0;
+  background:var(--accent-soft); color:#1e40af; border:1px solid var(--accent-line);
+}
+.note.warn{background:var(--warn-soft); color:var(--warn); border-color:#f0dfae}
+.note.err{background:var(--err-soft); color:var(--err); border-color:#f2c6c2}
+.empty{
+  text-align:center; padding:32px 20px; color:var(--muted); border:1px dashed var(--line-strong);
+  border-radius:var(--radius); background:#fbfcfd;
+}
+.empty .big{font-size:14px; color:var(--text); margin-bottom:6px; font-weight:500}
+.checks{margin-top:10px; border-top:1px solid var(--line); padding-top:10px}
+.chk{display:flex; gap:9px; padding:5px 0; align-items:flex-start}
+.dot{
+  flex:0 0 auto; width:16px; height:16px; border-radius:50%; font-size:11px; line-height:16px;
+  text-align:center; font-weight:600; margin-top:2px;
+}
+.dot.pass{background:var(--ok-soft); color:var(--ok)}
+.dot.fail{background:var(--err-soft); color:var(--err)}
+.dot.warn{background:var(--warn-soft); color:var(--warn)}
+.dot.skip{background:#f2f4f7; color:var(--faint)}
+.chk .n{font-weight:500; font-size:12.5px; margin-right:6px}
+.chk .t{font-size:12.5px; color:var(--muted)}
+.spin{
+  display:inline-block; width:13px; height:13px; border:2px solid var(--accent-line);
+  border-top-color:var(--accent); border-radius:50%; animation:sp .7s linear infinite;
+  vertical-align:-2px; margin-right:6px;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+details.adv{margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
+details.adv summary{cursor:pointer; font-size:12.5px; color:var(--muted); list-style:none}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary:before{content:"▸ "; color:var(--faint)}
+details.adv[open] summary:before{content:"▾ "}
+details.adv .inner{padding-top:12px}
+.mlist{display:flex; flex-direction:column; gap:8px}
+.mitem{
+  display:flex; gap:12px; align-items:center; padding:11px 13px; border:1px solid var(--line);
+  border-radius:var(--radius); background:#fff;
+}
+.mitem.off{opacity:.55}
+.mitem .info{flex:1; min-width:0}
+.mitem .nm{font-weight:500; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.mitem .meta{font-size:12px; color:var(--muted); margin-top:2px}
+.pbar{height:4px; border-radius:2px; background:#eef0f3; overflow:hidden; margin-top:6px; max-width:220px}
+.pbar i{display:block; height:100%; background:var(--accent)}
+.switch{position:relative; width:38px; height:21px; flex:0 0 auto}
+.switch input{opacity:0; width:0; height:0; position:absolute}
+.switch span{
+  position:absolute; inset:0; background:#d0d5dd; border-radius:20px; cursor:pointer; transition:.15s;
+}
+.switch span:before{
+  content:""; position:absolute; width:15px; height:15px; left:3px; top:3px; background:#fff;
+  border-radius:50%; transition:.15s;
+}
+.switch input:checked + span{background:var(--accent)}
+.switch input:checked + span:before{transform:translateX(17px)}
+.toolbar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
+.preview{
+  max-width:260px; max-height:260px; border-radius:8px; border:1px solid var(--line);
+  display:block; margin-top:10px;
+}
+.actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; padding-top:16px; border-top:1px solid var(--line)}
+.warnlist{margin:12px 0 0; padding-left:18px; color:var(--warn); font-size:12.5px}
+.footer{margin-top:32px; color:var(--faint); font-size:12px; text-align:center}
+/* 键盘可达：可点选的卡片（厂商/类目）用 div 实现，必须补上焦点样式，
+   否则 Tab 键走到它时看不见焦点在哪。 */
+.pick:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* 顶部路径栏：默认折叠，给新手降噪；点开才看绝对路径。 */
+details.pathbar{padding:0; overflow:hidden}
+details.pathbar > summary{
+  cursor:pointer; list-style:none; padding:9px 12px; font-size:12px; color:var(--muted);
+  display:flex; align-items:center; gap:6px;
+}
+details.pathbar > summary::-webkit-details-marker{display:none}
+details.pathbar > summary:before{content:"▸"; color:var(--faint); font-size:10px}
+details.pathbar[open] > summary:before{content:"▾"}
+details.pathbar[open] > summary{border-bottom:1px solid var(--line)}
+details.pathbar .paths{
+  display:flex; flex-wrap:wrap; gap:6px 16px; padding:10px 12px;
+}
+/* 权重控件：滑块为主、数字为辅，两者并排避免"该拖还是该填"的犹豫。 */
+.wrow{display:flex; align-items:center; gap:12px}
+.wrow input[type=range]{flex:1}
+.wrow input[type=number]{flex:0 0 84px; width:84px; text-align:center}
+/* 错误提示条：比成功 toast 更醒目、停留更久，且支持多行/长文案。 */
+#err-toast{
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
+  max-width:min(560px, calc(100vw - 32px));
+  background:var(--err); color:#fff; padding:11px 18px; border-radius:10px;
+  font-size:13px; line-height:1.5; z-index:100; opacity:0; transition:opacity .2s;
+  box-shadow:0 6px 24px rgba(180,35,24,.28); pointer-events:none; white-space:pre-wrap;
+}
+#err-toast.show{opacity:1; pointer-events:auto}
+#err-toast .x{
+  float:right; margin:-2px -6px 0 12px; cursor:pointer; font-size:16px; line-height:1;
+  color:#fff; opacity:.75; background:none; border:0; padding:2px 4px;
+}
+#err-toast .x:hover{opacity:1}
+/* 确认弹窗：页面内的模态框，替代原生 confirm()（阻塞式、样式割裂）。 */
+#modal-mask{
+  position:fixed; inset:0; background:rgba(15,23,42,.4); z-index:110;
+  display:none; align-items:center; justify-content:center; padding:24px;
+}
+#modal-mask.show{display:flex}
+#modal-box{
+  background:var(--card); border:1px solid var(--line); border-radius:12px;
+  max-width:400px; width:100%; padding:20px 22px; box-shadow:0 12px 40px rgba(15,23,42,.18);
+}
+#modal-box h4{margin:0 0 8px; font-size:15px}
+#modal-box p{margin:0 0 18px; font-size:13px; line-height:1.6; color:var(--muted); word-break:break-all}
+#modal-box .mactions{display:flex; gap:8px; justify-content:flex-end}
+</style>
+</head>
+<body data-page-node-id="f19vwG2ExfrvsJDvH03s4C">
+<div class="wrap" data-page-node-id="4MyEsC5bSB2UCgk5wQ1mYz">
+
+<header data-page-node-id="gPHkrrhAPavo6iHKG9gUJ5">
+  <h1 data-page-node-id="2LYZVhfBfp0ShAQ1eNEwjm">media-router 配置页面</h1>
+  <p class="sub" data-page-node-id="GwVahceepEFa0p1m4ZFOxY">在这里配置厂商密钥和模型池。配置会写入 skill 目录，AI 助手随后就能用这些模型出图、出视频。</p>
+  <details class="pathbar mono" id="pathbar">
+    <summary>配置都写在哪？（点开查看文件路径）</summary>
+    <div class="paths">
+      <span>配置目录：<b id="p-skill">—</b></span>
+      <span>模型池：<b id="p-cfg">—</b></span>
+      <span>生成文件：<b id="p-overlay">—</b></span>
+      <span>密钥文件：<b id="p-secrets">—</b></span>
+    </div>
+  </details>
+  <div id="banners" data-page-node-id="gfkMNRqDqIX62y3vxpzB1Q"></div>
+</header>
+
+<div class="tabs" data-page-node-id="MlxIUt4TuALWCU1DMQ9QML">
+  <button class="tab on" data-tab="vendors" data-page-node-id="uTHWB3zp8EJyCbNhy9HBJL">① 厂商配置</button>
+  <button class="tab" data-tab="models" data-page-node-id="z1vWe8NbWGBNhMZHrLDSx2">② 模型配置</button>
+</div>
+
+<!-- ============================ 厂商 ============================ -->
+<section class="panel on" id="panel-vendors" data-page-node-id="ZGctR57PYLltNbzVABCS44">
+  <div class="note" data-page-node-id="4nqQADZIkLfYeUYrdVvLYx">
+    先在下面添加你有的厂商，把 API Key 填进去。密钥只会存在你本机的
+    <span class="mono" data-page-node-id="KLquEDYwiRvLEV5LcPKMpe">config/secrets.web.yaml</span> 里（该文件已被 .gitignore 忽略），不会被发送到别处。
+    你自己手写的 <span class="mono" data-page-node-id="xwecSftWDNiXEEA2IxDP8P">secrets.yaml</span> 和 <span class="mono" data-page-node-id="2WfbXC9LQHCPzKCtqCm2s0">models.yaml</span> 不会被改动。
+  </div>
+
+  <div class="toolbar" data-page-node-id="NzMsyGknY3J1q6YgLCfxnC">
+    <button class="primary" id="btn-add-vendor" data-page-node-id="Hy0B8tTMhjvhzABGpD38vH">+ 添加厂商</button>
+    <span class="sub" id="vendor-count" data-page-node-id="riq8XyTvcUVmnJl8e1zEb5"></span>
+  </div>
+
+  <div id="vendor-list" class="mlist" data-page-node-id="jcSRpOnxhE21XQOSQj9jqp"></div>
+
+  <div class="card" id="vendor-form" style="display:none; margin-top:14px" data-page-node-id="dJcVUkHoqoqbRUEwyq2lFO">
+    <h2 id="vf-title" data-page-node-id="uGLrHmPTGgPidUw44Vxzkh">添加厂商</h2>
+
+    <h3 data-page-node-id="u9nsEJz9QiH8GQ84wlOl5x">第一步：选择厂商</h3>
+    <div class="grid3" id="provider-grid" data-page-node-id="uyv1DLgf70DJccBiKqAI9l"></div>
+
+    <div id="vf-fields" style="display:none" data-page-node-id="ib4CvWQHjF6WlidHtajqV8">
+      <h3 style="margin-top:20px" data-page-node-id="Xak59yBcKWBeYhkRdZHZZL">第二步：填入密钥</h3>
+      <div id="vf-keyfields" data-page-node-id="lFdmtdooPVaDewNqG7hjSv"></div>
+
+      <details class="adv" data-page-node-id="FRfv927efXNQEOhNZ92vbc">
+        <summary data-page-node-id="IGpEnFnCURDkbwXoi9Hq7j">高级选项（一般不用改）</summary>
+        <div class="inner" data-page-node-id="mydUQVxEZmOhhy6b07KSEG">
+          <label class="lbl" data-page-node-id="ZidQuvQXEVt5pDokPX78ov">显示名称</label>
+          <input id="vf-label" placeholder="留空则用厂商默认名称" data-page-node-id="C1ArJKOIujg5AbWdEq7kEq">
+          <div class="hint" data-page-node-id="nSD8B3EHKJEII2ieszfOur">只影响界面显示，随便起。</div>
+          <div class="grid2" style="margin-top:14px" data-page-node-id="N5FEGWJm9lvcxlkdBhqQtj">
+            <div data-page-node-id="9VGjziyApwBiSTvJSBtDs6">
+              <label class="lbl" style="margin-top:0" data-page-node-id="XBGBBH7ARmNAV6AK2d0Kx7">图像接口地址</label>
+              <input id="vf-ep-image" class="mono" placeholder="留空使用默认地址" data-page-node-id="klYADQ7IMwLsNG3tX0N1Dr">
+            </div>
+            <div data-page-node-id="fjWebCbax1ZHhyIRH1OcHN">
+              <label class="lbl" style="margin-top:0" data-page-node-id="mggtzJs8jDOFBUrmlK7QLB">视频接口地址</label>
+              <input id="vf-ep-video" class="mono" placeholder="留空使用默认地址" data-page-node-id="rHcSMOKfd2n591zulV0z7c">
+            </div>
+          </div>
+          <div class="hint" data-page-node-id="RslwNAPwG5ltQChLDO8chy">不确定就不要填，程序内置了各平台官方地址。</div>
+
+          <label class="lbl" style="margin-top:16px" data-page-node-id="ICbUF52GgRlXo61RDZ86Zt">接口参数（options，JSON）</label>
+          <textarea id="vf-options" class="mono" rows="7"
+            style="width:100%; padding:9px 11px; border:1px solid var(--line-strong);
+                   border-radius:8px; font-size:12.5px; line-height:1.6; resize:vertical"
+            placeholder='{"auth": {"type": "bearer"}}'></textarea>
+          <div class="hint" data-page-node-id="z1V04BSbQ4OoHxVSBAp2rH">
+            只有「自定义接口（高级）」需要填这块 —— 它没有内置协议，得靠这些参数说明
+            "请求怎么发、结果从哪儿取"。内置平台（火山、百炼、可灵…）留空即可。
+          </div>
+          <div class="hint" data-page-node-id="fb4cKZEZp4hbQab1VeLH2E">
+            最小可用示例（同步接口，提交后响应里直接带产物地址）：
+            <pre class="mono" style="margin:6px 0 0; white-space:pre-wrap; font-size:11.5px" data-page-node-id="By050RydazJSIzB81F3EuS">{
+  "auth": {"type": "bearer"},
+  "result_path": "data.images",
+  "result_url_field": "url"
+}</pre>
+          </div>
+          <div class="hint" data-page-node-id="leXH5350VJx8KbkU2jKx92">
+            响应里只有一个地址时可以连 <span class="mono" data-page-node-id="L9JBX6X0KggYMnxMi34KHK">result_path</span> 都不写，程序会自己找。
+            异步接口（先拿 task_id 再轮询）再加：
+            <pre class="mono" style="margin:6px 0 0; white-space:pre-wrap; font-size:11.5px" data-page-node-id="orth64b99p2ExQk7dTXZJ6">{
+  "submit": {"task_id_path": "data.task_id"},
+  "poll": {"url": "https://…/{{task_id}}", "status_path": "data.status",
+           "result_path": "data.result"}
+}</pre>
+          </div>
+          <div class="hint" data-page-node-id="5Ckq4Fc6qBD00F0RKh8W00">字段含义见 references/providers.md 的 generic_http 一节。</div>
+        </div>
+      </details>
+
+      <div id="vf-result" data-page-node-id="q9GUu4VNxd7j3p0Feo2QC8"></div>
+
+      <div class="actions" data-page-node-id="LN4tdofbhe29hKdvY6JcBY">
+        <button class="primary" id="btn-save-vendor" data-page-node-id="aeBlVXGC1HeWSWKOfEunfk">保存厂商</button>
+        <button id="btn-test-vendor" data-page-node-id="Tp9vEMAbnQEMsn9xlQ0nKC">测试连通性</button>
+        <button id="btn-cancel-vendor" data-page-node-id="aT9gRABcT7aMA2GspfsnBH">取消</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 模型 ============================ -->
+<section class="panel" id="panel-models" data-page-node-id="FNHBr4G89TB216vPAOR7ES">
+  <div class="note" id="models-gate" data-page-node-id="vPjWmW4YCbBUZg5HNlf9fx">
+    还没有配置任何厂商。请先到「① 厂商配置」添加一个厂商并填入 API Key，再回来添加模型。
+  </div>
+
+  <div class="card tight" data-page-node-id="2kxH8FAunVL2FQK9XuuUub">
+    <div class="row row-mid" data-page-node-id="IfqHXls43DJP89hoLj4Zgu">
+      <div class="grow" data-page-node-id="HDMFE2e5E5SMsXZAlWDXE9">
+        <div style="font-weight:500" data-page-node-id="7BtWf4BjCm5JoVcgH0beVS">同一优先级里的选中概率</div>
+        <div class="hint" data-page-node-id="nsIoyR5qL7qQm4tOdO0HeC">权重越大，被分到任务的概率越高。下面会实时显示每个模型的占比。</div>
+      </div>
+    </div>
+    <div id="prob-summary" style="margin-top:10px" data-page-node-id="SYvV2jyl43sSDY3y7uvpB8"></div>
+  </div>
+
+  <div class="toolbar" data-page-node-id="MTMEJwRFxGAaZmpL2uEIXE">
+    <button class="primary" id="btn-add-model" data-page-node-id="TWOyZrtXgAt4QSflo7Io5M">+ 添加模型</button>
+    <span class="sub" id="model-count" data-page-node-id="MaAYlR1hxS75q7tvojlAJj"></span>
+  </div>
+
+  <div id="model-list" data-page-node-id="8PHrPQ1HIUr6JH6kjKhGsq"></div>
+
+  <div class="card" id="model-form" style="display:none; margin-top:14px" data-page-node-id="nhcSm2CRWmWsLFMMJMJ1DA">
+    <h2 id="mf-title" data-page-node-id="6jHoRLh1WFft8VbCpwI6tM">添加模型</h2>
+
+    <label class="lbl" data-page-node-id="MHpZfSfijEWqNpYandfKo6">① 选择厂商</label>
+    <select id="mf-vendor" data-page-node-id="pqNsl5WAclBHYSflzXtELU"></select>
+    <div class="hint" id="mf-vendor-hint" data-page-node-id="fOj9IVzwAzMjv0org49FmY"></div>
+
+    <label class="lbl" data-page-node-id="xOwBWx5vpmiGQs9gb7KWTf">② 模型名称</label>
+    <div style="display:flex; gap:8px" data-page-node-id="hVdEjCaJqZmJyyNkZi1X41">
+      <input id="mf-model" class="mono" placeholder="例如 doubao-seedream-3-0-t2i-250415" list="model-suggestions" data-page-node-id="BKOQdExiCTAFvmbTWtQFDn">
+    </div>
+    <datalist id="model-suggestions" data-page-node-id="HoqZQ3ZXF2E20SVyFL5nWT"></datalist>
+    <div class="hint" id="mf-model-hint" data-page-node-id="2m5zoz07TEnz7mZuqmrc98">以厂商控制台里显示的模型名为准，手动填写。</div>
+
+    <label class="lbl" data-page-node-id="JyXAJpcJ3UCu63YOUgKSvi">③ 这是什么类型的模型</label>
+    <div class="grid2" data-page-node-id="AmrMTOEixxMVUzB4Wgsoua">
+      <div class="pick on" data-kind="image" role="button" tabindex="0" aria-pressed="true" data-page-node-id="TVceBUQYNIT3WpFnnLnX3x">
+        <div class="t" data-page-node-id="FEQ7sgJ2OPNYeN4yERGlmD">图像模型</div>
+        <div class="d" data-page-node-id="rfw5BMwQeGKlEXjFy6QG9C">生成图片。文生图默认支持；勾选后也可用于图生图。</div>
+      </div>
+      <div class="pick" data-kind="video" role="button" tabindex="0" aria-pressed="false" data-page-node-id="HzQKB5fTBxkTmEig3bjbnS">
+        <div class="t" data-page-node-id="SlJRKfbdphUaaPIF2TJBnL">视频模型</div>
+        <div class="d" data-page-node-id="iMAewKLGU7bPIxXuy189CB">生成短视频。文生视频默认支持；勾选后也可用于图生视频。</div>
+      </div>
+    </div>
+
+    <label class="lbl">④ 生成规格（可选）</label>
+    <div id="mf-spec-image">
+      <div class="grid2">
+        <div>
+          <label class="lbl" style="margin-top:0">图像尺寸</label>
+          <select id="mf-size-preset">
+            <option value="">不指定（用平台默认）</option>
+            <option value="1024x1024">1024×1024（方图 1K）</option>
+            <option value="1536x1024">1536×1024（横图 1.5K）</option>
+            <option value="1024x1536">1024×1536（竖图 1.5K）</option>
+            <option value="2048x2048">2048×2048（方图 2K）</option>
+            <option value="3072x2048">3072×2048（横图 3K）</option>
+            <option value="2048x3072">2048×3072（竖图 3K）</option>
+            <option value="custom">自定义…</option>
+          </select>
+          <input id="mf-size-custom" class="mono" placeholder="例如 1664x928" style="display:none; margin-top:6px">
+        </div>
+        <div>
+          <div class="hint" style="margin-top:24px">
+            这里设的是这个模型<b>每次生成</b>的默认尺寸。发请求时也可以在提示里临时指定，临时的优先。
+            注意：不是每个模型都支持所有尺寸（比如有的只收 1024×1024，有的用「1K/2K/4K」这种叫法），
+            以厂商文档为准；填了不支持的值平台会报错。
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="mf-spec-video" style="display:none">
+      <div class="grid2">
+        <div>
+          <label class="lbl" style="margin-top:0">清晰度</label>
+          <select id="mf-resolution">
+            <option value="">不指定（用平台默认）</option>
+            <option value="480p">480p（省额度）</option>
+            <option value="720p">720p</option>
+            <option value="1080p">1080p（更清晰、更贵）</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl" style="margin-top:0">时长（秒）</label>
+          <select id="mf-duration">
+            <option value="">不指定（用平台默认）</option>
+            <option value="3">3 秒</option>
+            <option value="5">5 秒</option>
+            <option value="10">10 秒</option>
+          </select>
+        </div>
+      </div>
+      <div class="hint">
+        清晰度和时长直接影响花费：1080p / 10 秒比 480p / 5 秒贵得多。
+        不是每个模型都支持全部组合（可灵一般 5/10 秒，即梦 3~12 秒），以厂商文档为准。
+      </div>
+    </div>
+
+    <label class="lbl" data-page-node-id="dpseboGl3sed5boZrVdgoG">⑤ 权重：<span id="mf-w-label" style="color:var(--accent)" data-page-node-id="YZ9GH2u4cN2crpdNI1LREh">50</span></label>
+    <div class="wrow">
+      <input type="range" id="mf-weight-range" min="1" max="100" value="50" aria-label="权重滑块" data-page-node-id="qkCwfGU49eqcbLoMJY51fo">
+      <input type="number" id="mf-weight" min="0" step="1" value="50" aria-label="权重数值" data-page-node-id="VvBMOW2D11T3PyaVLkZbLW">
+    </div>
+    <div class="hint" data-page-node-id="ukOi2LggVQtsdC9GxnoWSm">拖动滑块或直接填数字都行。越大越容易被选中；同一优先级内按权重比例分流，例如 50 和 30 大约是 62% 与 38%。</div>
+
+    <details class="adv" data-page-node-id="8bs3eYnmK8z2AO7F7kjwFw">
+      <summary data-page-node-id="FCux7gWCmZGUXG79YVNAD7">高级选项</summary>
+      <div class="inner" data-page-node-id="f7E183LJIWVb8UjT1xjgoS">
+        <label class="lbl" style="margin-top:0" data-page-node-id="iWoifa3RDs8YSxEtMLsnoF">优先级</label>
+        <input type="number" id="mf-priority" min="1" step="1" value="1" data-page-node-id="xGGHjKSz0EmhCba3F4svSc">
+        <div class="hint" data-page-node-id="ERFPE0dsgVRNJP4a8XcSTM">
+          数字越小越优先。优先级 1 的模型永远压过优先级 2 —— 只有前面的都不可用才会轮到后面的。
+          想按权重分流就都填 1，想设成"主用 + 备用"就给备用模型填 2。
+        </div>
+
+        <label class="lbl" data-page-node-id="uY9iBD1ACV8v1zXSnKzlAK">附加能力</label>
+        <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400; margin-bottom:6px" data-page-node-id="WFKKp7N4sqilK5Y8Ym0Sc6">
+          <input type="checkbox" id="mf-extra" style="width:auto; margin-top:4px" data-page-node-id="q5d1cke10J64XWFxsAnEOh">
+          <span data-page-node-id="mTQGcF8nx8XzI1DuJEgoCg">支持以图片作为输入（图生图 / 图生视频）
+            <span class="hint" style="display:block" data-page-node-id="2em0KmTqZlmhRWnpb7T9TP">不确定就先不勾。勾错了会在实际使用时失败。</span>
+          </span>
+        </label>
+
+        <label class="lbl" data-page-node-id="bCQkraJBJZLjLRTkbVxrEb">显示名称</label>
+        <input id="mf-label" placeholder="留空则用模型名" data-page-node-id="X7zEuFac8b0zlBiZYew1Sl">
+      </div>
+    </details>
+
+    <input type="hidden" id="mf-id" data-page-node-id="WDlSUEppOvnfHXjEEKY3Dl">
+
+    <div id="mf-result" data-page-node-id="SxOkeXzukZi6GNIL1MZECe"></div>
+
+    <div class="actions" data-page-node-id="V4rFlhumRkzFfsjvHkSrhE">
+      <button class="primary" id="btn-save-model" data-page-node-id="VVFQ7HqK8XuKgq1Yo8B7FC">保存模型</button>
+      <button id="btn-test-model" data-page-node-id="19XLoVZR31XpGz2VZhbwof">测试连通性</button>
+      <button id="btn-cancel-model" data-page-node-id="0gQYEfkrbaO3zH0pjpgSun">取消</button>
+    </div>
+  </div>
+</section>
+
+<div class="footer" data-page-node-id="J3Bnnd6bVEWK6ZDjWngyyI">
+  本页面只在本机 <span id="p-host" class="mono" data-page-node-id="gCDulGbFGqmr80OvJHK45y">127.0.0.1</span> 上运行，关闭终端里的进程即停止。
+</div>
+</div>
+
+<script>
+const TOKEN = "__MR_TOKEN__";
+
+const state = {catalog:[], vendors:[], models:{}, kinds:["image","video"], warnings:[], paths:{}};
+let pick = {catalog_key:"", kind:"image", extra:false, editingVendor:null, editingModel:null};
+
+/* ------------------------------------------------------------------ 工具 */
+/* 页面内确认弹窗（Promise 风格，供 await）。替代原生 confirm()：
+   原生是阻塞式系统弹窗，样式割裂、长文案被截断，还会冻结整个页面。
+   用法：const ok = await uiConfirm("删除模型", "确定要删除 xxx 吗？", "删除"); */
+function uiConfirm(title, text, okLabel){
+  return new Promise(resolve=>{
+    let mask = el("modal-mask");
+    if(!mask){
+      mask = document.createElement("div");
+      mask.id = "modal-mask";
+      mask.innerHTML =
+        '<div id="modal-box" role="alertdialog" aria-modal="true">'+
+        '<h4 id="modal-title"></h4><p id="modal-text"></p>'+
+        '<div class="mactions">'+
+        '<button type="button" id="modal-cancel">取消</button>'+
+        '<button type="button" class="danger" id="modal-ok"></button>'+
+        '</div></div>';
+      document.body.appendChild(mask);
+      /* 两个按钮 + 点遮罩关闭 + Escape 关闭，都走同一个收尾函数 */
+      mask.addEventListener("click", ev=>{
+        if(ev.target === mask){ close(false); return; }
+        if(ev.target.id === "modal-cancel"){ close(false); return; }
+        if(ev.target.id === "modal-ok"){ close(true); return; }
+      });
+      document.addEventListener("keydown", ev=>{
+        if(ev.key === "Escape" && mask.classList.contains("show")){ close(false); }
+      });
+      let closer = null;
+      function close(result){
+        mask.classList.remove("show");
+        if(closer){ clearTimeout(closer); closer = null; }
+        if(document.activeElement && document.activeElement.closest("#modal-box")) document.activeElement.blur();
+        resolve(result);
+      }
+      mask._close = close;
+    }
+    el("modal-title").textContent = title;
+    el("modal-text").textContent = text;
+    el("modal-ok").textContent = okLabel || "确定";
+    mask.classList.add("show");
+    el("modal-ok").focus();
+  });
+}
+
+/* 服务断开时给出明确提示。没有这段的话，后台一关，页面上的按钮就全都
+   "点不动" —— 用户只会以为程序坏了，完全不知道是连不上后台。 */
+function networkDown(){
+  const box = el("banners");
+  if(!box || box.querySelector(".conn-lost")) return;
+  const d = document.createElement("div");
+  d.className = "note err conn-lost";
+  d.style.marginTop = "12px";
+  d.innerHTML = '<b>连不上配置服务了。</b>这个页面对应的后台已经关闭（终端里按了 Ctrl-C，'+
+    '或者进程被结束了），所以按钮都不会有反应。<br>回到终端重新运行 '+
+    '<span class="mono">env\\Scripts\\python.exe scripts\\media_router.py web</span>，'+
+    '再打开它打印的那个新地址即可。';
+  box.appendChild(d);
+}
+function networkUp(){
+  const box = el("banners");
+  const stale = box && box.querySelector(".conn-lost");
+  if(stale) stale.remove();
+}
+
+async function api(path, opts){
+  let res;
+  try{
+    res = await fetch(path, Object.assign({
+      headers:{"Content-Type":"application/json","X-MR-Token":TOKEN}
+    }, opts||{}));
+  }catch(e){
+    networkDown();
+    throw new Error("连不上配置服务，请在终端重新启动它（原来的进程已经退出）");
+  }
+  networkUp();
+  let data = {};
+  try{ data = await res.json(); }catch(e){ data = {error:res.statusText}; }
+  if(!res.ok) throw new Error(data.error || ("HTTP "+res.status));
+  return data;
+}
+function el(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+const DOT = {pass:"✓", fail:"✗", warn:"!", skip:"·"};
+
+/* 在列表项下面插一个结果卡片。重复点同一个"测试"就复用，不堆一屏幕。 */
+function resultBoxAfter(item, key){
+  const prev = item.nextElementSibling;
+  if(prev && prev.dataset && prev.dataset.mrResult === key) prev.remove();
+  const box = document.createElement("div");
+  box.className = "card";
+  box.dataset.mrResult = key;
+  box.style.marginTop = "-2px";
+  item.insertAdjacentElement("afterend", box);
+  return box;
+}
+
+function renderChecks(container, result){
+  if(!result){ container.innerHTML=""; return; }
+  const cls = result.ok ? "ok" : "err";
+  let html = '<div class="note '+(result.ok?"":"err")+'">'+
+    '<span class="badge '+cls+'">'+(result.ok?"通过":"未通过")+'</span> '+esc(result.summary||"")+'</div>';
+  if(result.checks && result.checks.length){
+    html += '<div class="checks">';
+    result.checks.forEach(c=>{
+      html += '<div class="chk"><span class="dot '+c.status+'">'+(DOT[c.status]||"·")+'</span>'+
+        '<span><span class="n">'+esc(c.name)+'</span><span class="t">'+esc(c.detail||"")+'</span></span></div>';
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+/* ------------------------------------------------------------------ 厂商 */
+function catalogEntry(key){
+  return state.catalog.find(c=>c.key===key) || null;
+}
+function vendorById(id){ return state.vendors.find(v=>v.id===id) || null; }
+function findModelById(id){
+  let found = null;
+  state.kinds.forEach(k=>{ (state.models[k]||[]).forEach(m=>{ if(m.id===id) found=m; }); });
+  return found;
+}
+
+async function loadAll(){
+  const data = await api("/api/bootstrap");
+  state.catalog = data.catalog;
+  state.vendors = data.vendors;
+  state.models = data.models;
+  state.kinds = data.kinds.length ? data.kinds : ["image","video"];
+  state.warnings = data.warnings || [];
+  state.paths = data.paths || {};
+  el("p-skill").textContent = data.paths.skill_dir;
+  el("p-cfg").textContent = data.paths.config_path;
+  el("p-overlay").textContent = data.paths.overlay_path || (data.paths.overlay_target + "（保存后出现）");
+  el("p-secrets").textContent = data.paths.secrets_path;
+  el("p-host").textContent = data.paths.host || "127.0.0.1";
+  renderBanners(data);
+  renderVendors(); renderModels(); renderProbability();
+}
+
+function renderBanners(data){
+  const box = el("banners");
+  let html = "";
+  if(data.readonly){
+    html += '<div class="note err" style="margin-top:12px"><b>当前为只读模式。</b> '+esc(data.readonly)+'</div>';
+  }
+  if((data.warnings||[]).length){
+    html += '<div class="note warn" style="margin-top:12px"><b>配置文件里有需要留意的地方：</b>'+
+      '<ul class="warnlist">'+data.warnings.map(w=>'<li>'+esc(w)+'</li>').join("")+'</ul></div>';
+  }
+  box.innerHTML = html;
+}
+
+function renderVendors(){
+  const box = el("vendor-list");
+  el("vendor-count").textContent = state.vendors.length ? ("已配置 "+state.vendors.length+" 个厂商") : "";
+  if(!state.vendors.length){
+    box.innerHTML = '<div class="empty"><div class="big">还没有配置厂商</div>'+
+      '点上面的「添加厂商」，选一个你用过的平台，把 API Key 填进去即可。</div>';
+    updateModelsGate();
+    return;
+  }
+  box.innerHTML = state.vendors.map(v=>{
+    const hasKey = v.has_key !== false && v.api_key_env;
+    const kb = v.has_key
+      ? '<span class="badge ok">密钥已配置</span>'
+      : '<span class="badge warn">还未填密钥</span>';
+    const label = v.label || v.id;
+    const e = catalogEntry(v.catalog);
+    const kinds = e ? e.kinds.join(" / ") : "";
+    return '<div class="mitem" data-vid="'+esc(v.id)+'">'+
+      '<div class="info"><div class="nm">'+esc(label)+' '+kb+'</div>'+
+      '<div class="meta mono">'+esc(v.id)+' &middot; '+esc(v.provider)+' &middot; '+esc(v.api_key_env||"无需密钥")+
+      (kinds?(' &middot; 支持 '+esc(kinds)):'')+'</div></div>'+
+      '<button class="sm" data-act="test-vendor" data-vid="'+esc(v.id)+'">测试</button>'+
+      '<button class="sm" data-act="edit-vendor" data-vid="'+esc(v.id)+'">编辑</button>'+
+      '<button class="sm danger" data-act="del-vendor" data-vid="'+esc(v.id)+'">删除</button>'+
+      '</div>';
+  }).join("");
+  updateModelsGate();
+}
+
+function updateModelsGate(){
+  el("models-gate").style.display = state.vendors.length ? "none" : "block";
+  el("btn-add-model").disabled = !state.vendors.length;
+}
+
+function renderProviderGrid(){
+  el("provider-grid").innerHTML = state.catalog.map(c=>{
+    const on = c.key===pick.catalog_key;
+    /* 这些卡片是 div 实现的"按钮"，必须补 role/tabindex/aria-pressed，
+       否则键盘 Tab 走不到、读屏也读不出选中状态。 */
+    return '<div class="pick'+(on?" on":"")+'" data-pkey="'+esc(c.key)+'"'+
+      ' role="button" tabindex="0" aria-pressed="'+(on?"true":"false")+'">'+
+      '<div class="t">'+esc(c.label)+'</div><div class="d">'+esc(c.beginner)+'</div>'+
+      (c.keyless?'<div class="chips"><span class="badge idle">无需密钥</span></div>':'')+
+      '</div>';
+  }).join("");
+}
+
+function showVendorForm(vendor){
+  pick.editingVendor = vendor ? vendor.id : null;
+  pick.catalog_key = vendor ? (vendor.catalog || vendor.provider) : "";
+  el("vf-title").textContent = vendor ? "编辑厂商" : "添加厂商";
+  el("vendor-form").style.display = "block";
+  el("vf-result").innerHTML = "";
+  renderProviderGrid();
+  el("vf-fields").style.display = pick.catalog_key ? "block" : "none";
+  el("vf-label").value = vendor ? (vendor.label||"") : "";
+  el("vf-ep-image").value = vendor && vendor.endpoints ? (vendor.endpoints.image||"") : "";
+  el("vf-ep-video").value = vendor && vendor.endpoints ? (vendor.endpoints.video||"") : "";
+  el("vf-options").value = (vendor && vendor.options && Object.keys(vendor.options).length)
+    ? JSON.stringify(vendor.options, null, 2) : "";
+  renderKeyFields(vendor);
+  /* 表单在厂商列表下面，列表一长就跑到屏幕外去了 —— 不滚过去的话，
+     用户会觉得"点了没反应"。 */
+  try{ el("vendor-form").scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+}
+
+/* 厂商的类型不在内置目录里时，表单会一个密钥输入框都渲染不出来 ——
+   必须说出来，否则用户只会觉得"点不动"。 */
+function renderUnknownCatalog(vendor){
+  const box = el("vf-keyfields");
+  const key = pick.catalog_key || "（空）";
+  box.innerHTML = '<div class="note err">'+
+    '这个厂商的类型是 <span class="mono">'+esc(key)+'</span>，不在内置平台目录里，'+
+    '所以没法自动给出要填哪些密钥。<br>'+
+    '常见原因是它由更早的版本写入、或者手写时写错了 catalog 字段。<br>'+
+    '建议：在下面重新点一个平台卡片，再保存一次即可修正。</div>';
+}
+
+function renderKeyFields(vendor){
+  const c = catalogEntry(pick.catalog_key);
+  const box = el("vf-keyfields");
+  if(!c){ renderUnknownCatalog(vendor); return; }
+  if(c.keyless){
+    box.innerHTML = '<div class="note">该厂商使用 AI 助手的内置能力，不需要密钥，直接保存即可。</div>';
+    return;
+  }
+  box.innerHTML = c.key_fields.map((f,i)=>{
+    /* 厂商的环境变量名可能被服务端改过（比如第二个火山账号会变成 ARK_API_KEY_2），
+       所以按"已经配过第一个字段"来判断，而不是拿名字硬比。 */
+    const existing = (vendor && i===0 && vendor.api_key_env && !vendor.keyless) ? "already" : "";
+    const ph = existing ? "已配置，留空表示不修改" : (f.placeholder||"");
+    return '<div style="margin-bottom:12px">'+
+      '<label class="lbl" style="margin-top:0">'+esc(f.label)+
+      (f.required?'':' <span class="hint">（可留空）</span>')+'</label>'+
+      '<input class="vf-key" data-idx="'+i+'" type="password" autocomplete="off" placeholder="'+esc(ph)+'">'+
+      (f.hint?'<div class="hint">'+esc(f.hint)+'</div>':'')+
+      (existing?'<div class="hint" style="color:var(--ok)">当前已保存过密钥，不修改就留空。变量名：<span class="mono">'+esc(vendor.api_key_env)+'</span></div>':'')+
+      '</div>';
+  }).join("");
+}
+
+function collectVendorPayload(){
+  const c = catalogEntry(pick.catalog_key);
+  if(!c) throw new Error("请先选择厂商");
+  const keys = Array.from(document.querySelectorAll(".vf-key")).map(i=>i.value.trim());
+  return {
+    id: pick.editingVendor || "",
+    catalog_key: c.key,
+    label: el("vf-label").value.trim() || c.label,
+    api_key_env: (c.key_fields[0]||{}).env || "",
+    api_key: keys[0] || "",
+    endpoints: {
+      image: el("vf-ep-image").value.trim(),
+      video: el("vf-ep-video").value.trim()
+    },
+    options: collectOptions()
+  };
+}
+
+function collectOptions(){
+  const raw = (el("vf-options").value || "").trim();
+  if(!raw) return "";
+  try{ JSON.parse(raw); }
+  catch(e){ throw new Error("接口参数不是合法的 JSON："+e.message+"\n（只填自定义接口需要的那些键；内置平台留空即可）"); }
+  return raw;
+}
+
+async function saveVendor(){
+  const btn = el("btn-save-vendor");
+  btn.disabled = true;
+  try{
+    const payload = collectVendorPayload();
+    const res = await api("/api/vendor", {method:"POST", body:JSON.stringify(payload)});
+    await loadAll();
+    showVendorForm(vendorById(res.id));
+    showToast(res.message || "厂商已保存");
+  }catch(e){ showError("保存失败："+e.message); }
+  finally{ btn.disabled = false; }
+}
+
+function payloadFromVendor(vendor){
+  /* 列表里直接点「测试」时表单没打开，不能去读输入框 */
+  return {
+    id: vendor.id,
+    catalog_key: vendor.catalog || vendor.provider,
+    label: vendor.label || "",
+    api_key_env: vendor.api_key_env || "",
+    api_key: "",
+    endpoints: vendor.endpoints || {}
+  };
+}
+
+async function testVendor(input){
+  const box = input.box;
+  box.innerHTML = '<div class="note"><span class="spin"></span>正在测试…（不会生成任何内容，不消耗额度）</div>';
+  try{
+    let base;
+    if(input.saved && input.vendorId){
+      const v = vendorById(input.vendorId);
+      if(!v){ box.innerHTML = '<div class="note err">找不到这个厂商，请刷新页面。</div>'; return; }
+      base = payloadFromVendor(v);
+    }else{
+      base = collectVendorPayload();
+    }
+    const payload = Object.assign(base, {kind:input.kind||"image", model_name:input.model_name||""});
+    const res = await api("/api/vendor/test", {method:"POST", body:JSON.stringify(payload)});
+    renderChecks(box, res);
+  }catch(e){
+    box.innerHTML = '<div class="note err">测试失败：'+esc(e.message)+'</div>';
+  }
+}
+
+/* ------------------------------------------------------------------ 模型 */
+function probabilityMap(kind){
+  const list = (state.models[kind]||[]).filter(m=>m.enabled);
+  const tiers = {};
+  list.forEach(m=>{ (tiers[m.priority] = tiers[m.priority]||[]).push(m); });
+  const out = {};
+  Object.keys(tiers).forEach(k=>{
+    const tier = tiers[k];
+    const total = tier.reduce((s,m)=>s+Number(m.weight||0),0);
+    tier.forEach(m=>{ out[m.id] = total>0 ? Number(m.weight||0)/total : 0; });
+  });
+  return out;
+}
+
+function renderProbability(){
+  const box = el("prob-summary");
+  const parts = [];
+  state.kinds.forEach(kind=>{
+    const list = (state.models[kind]||[]).filter(m=>m.enabled);
+    if(list.length<2) return;
+    const pm = probabilityMap(kind);
+    const tier = Math.min.apply(null, list.map(m=>m.priority));
+    const sameTier = list.filter(m=>m.priority===tier);
+    if(sameTier.length<2) return;
+    const label = kind==="image" ? "图像" : (kind==="video" ? "视频" : kind);
+    parts.push('<div style="margin-bottom:8px"><b>'+esc(label)+'</b>（优先级 '+tier+' 层）：'+
+      sameTier.map(m=>esc(m.label||m.model)+' <span class="mono">'+Math.round(pm[m.id]*100)+'%</span>').join(" ｜ ")+
+      '</div>');
+  });
+  box.innerHTML = parts.length ? parts.join("")
+    : '<div class="hint">同一优先级下至少要有 2 个启用的模型，才会用到权重分流。</div>';
+}
+
+function renderModels(){
+  state.kinds.forEach(kind=>{
+    const box = el("model-list-"+kind);
+    if(!box) return;
+    const list = state.models[kind]||[];
+    if(!list.length){
+      box.innerHTML = '<div class="empty">还没有'+(kind==="image"?"图像":"视频")+'模型。</div>';
+      return;
+    }
+    const pm = probabilityMap(kind);
+    box.innerHTML = list.map(m=>{
+      const extra = (m.supports||[]).some(s=>s.indexOf("img2")===0);
+      const prob = pm[m.id];
+      /* 手写层里的模型标出来：用户点「删除」时实际是"隐藏"，
+         不提前说清楚他会以为是坏的。 */
+      const handwritten = m.from_base
+        ? ' <span class="badge idle" title="写在 config/models.yaml 里，页面不改动你手写的文件">手写配置</span>'
+        : '';
+      const owner = m.vendor
+        ? esc(m.vendor_label || m.vendor)
+        : ('内联 ' + esc(m.provider || 'provider'));
+      return '<div class="mitem'+(m.enabled?"":" off")+'">'+
+        '<label class="switch"><input type="checkbox" '+(m.enabled?"checked":"")+
+          ' data-act="toggle-model" data-mid="'+esc(m.id)+'"><span></span></label>'+
+        '<div class="info"><div class="nm">'+esc(m.label||m.model)+
+          (extra?' <span class="badge tag">支持图生</span>':'')+handwritten+'</div>'+
+        '<div class="meta"><span class="mono">'+esc(m.model)+'</span> &middot; '+
+          owner+' &middot; 权重 '+m.weight+' &middot; 优先级 '+m.priority+
+          (prob!=null?(' &middot; 选中概率 '+Math.round(prob*100)+'%'):'')+'</div>'+
+        (prob!=null?'<div class="pbar"><i style="width:'+Math.round(prob*100)+'%"></i></div>':'')+
+        '</div>'+
+        '<button class="sm" data-act="test-model" data-mid="'+esc(m.id)+'">测试</button>'+
+        '<button class="sm" data-act="edit-model" data-mid="'+esc(m.id)+'">编辑</button>'+
+        '<button class="sm danger" data-act="del-model" data-mid="'+esc(m.id)+'">'+
+          (m.from_base?'隐藏':'删除')+'</button>'+
+        '</div>';
+    }).join("");
+  });
+  const total = state.kinds.reduce((s,k)=>s+(state.models[k]||[]).length,0);
+  el("model-count").textContent = total ? ("共 "+total+" 个模型") : "";
+}
+
+function renderModelGroups(){
+  el("model-list").innerHTML = state.kinds.map(kind=>{
+    const label = kind==="image" ? "图像模型" : (kind==="video" ? "视频模型" : kind);
+    return '<h3 style="margin-top:18px">'+esc(label)+'</h3><div class="mlist" id="model-list-'+esc(kind)+'"></div>';
+  }).join("");
+}
+
+function fillVendorSelect(model){
+  const sel = el("mf-vendor");
+  let html = "";
+  /* 编辑手写层里的模型时，它没有厂商条目（用的是内联 provider），
+     这时给一个"保持原样"的选项，让用户至少能改优先级和权重。 */
+  if(model && !model.vendor){
+    html += '<option value="">（保持原样，不改厂商）</option>';
+  }
+  html += state.vendors.map(v=>'<option value="'+esc(v.id)+'">'+esc(v.label||v.id)+'</option>').join("");
+  sel.innerHTML = html;
+  if(model && !model.vendor) sel.value = "";
+}
+
+function onVendorPick(){
+  const vid = el("mf-vendor").value;
+  const v = vid ? vendorById(vid) : null;
+  const e = v ? catalogEntry(v.catalog || v.provider) : null;
+  const keep = !vid;
+
+  el("mf-vendor-hint").textContent = keep
+    ? "这个模型写在 config/models.yaml 里，用的是它自己的 provider 和密钥，不挂在任何厂商下。这里只能改它的名称、优先级、权重和能力标签 —— 想改接口或密钥请直接编辑 models.yaml。"
+    : (e ? e.beginner : "");
+  /* 模型名手动填写。目录里给了"该平台列不了模型"的具体原因就用它
+     （火山方舟要 AK/SK 签名等），提示用户去控制台抄名字。 */
+  const listNote = (v && v.list_note) || (e && e.list_note) || "";
+  el("mf-model-hint").textContent = keep
+    ? "模型名按 models.yaml 里写的填。"
+    : (listNote
+        || "以厂商控制台里显示的模型名为准，手动填写，用「测试连通性」确认。");
+  el("model-suggestions").innerHTML = e
+    ? kindList((e.suggestions && e.suggestions[pick.kind]) || [])
+    : "";
+  el("mf-vendor").disabled = false;
+}
+function kindList(arr){ return arr.map(s=>'<option value="'+esc(s)+'">').join(""); }
+
+function showModelForm(model){
+  if(!state.vendors.length && !(model && !model.vendor)){
+    showError("请先添加并保存一个厂商，再回来添加模型。");
+    /* 顺手把用户带到厂商 Tab，省得他自己找 */
+    const tab = document.querySelector('.tab[data-tab="vendors"]');
+    if(tab) tab.click();
+    return;
+  }
+  pick.editingModel = model ? model.id : null;
+  el("mf-title").textContent = model ? "编辑模型" : "添加模型";
+  el("model-form").style.display = "block";
+  el("mf-result").innerHTML = "";
+  fillVendorSelect(model);
+  el("mf-id").value = model ? model.id : "";
+  const params = (model && model.params) || {};
+  if(model){
+    el("mf-vendor").value = model.vendor || "";
+    el("mf-model").value = model.model || "";
+    el("mf-priority").value = model.priority;
+    el("mf-weight").value = model.weight;
+    el("mf-weight-range").value = Math.min(100, Math.max(1, model.weight));
+    el("mf-label").value = model.label && model.label!==model.model ? model.label : "";
+    el("mf-extra").checked = (model.supports||[]).some(s=>s.indexOf("img2")===0);
+    setKind(model.kind);
+  }else{
+    el("mf-model").value = "";
+    el("mf-priority").value = 1;
+    el("mf-weight").value = 50;
+    el("mf-weight-range").value = 50;
+    el("mf-label").value = "";
+    el("mf-extra").checked = false;
+    setKind("image");
+  }
+  /* ④ 生成规格回填：preset 里没有的值归到「自定义…」 */
+  const size = String(params.size || "");
+  const preset = el("mf-size-preset");
+  const known = Array.from(preset.options).some(o=>o.value===size && o.value!=="custom");
+  preset.value = size ? (known ? size : "custom") : "";
+  el("mf-size-custom").value = (size && !known) ? size : "";
+  onSizePresetChange();
+  el("mf-resolution").value = String(params.resolution || "");
+  el("mf-duration").value = params.duration!==undefined && params.duration!=="" ? String(params.duration) : "";
+  el("mf-w-label").textContent = el("mf-weight").value;
+  onVendorPick();
+}
+
+function setKind(kind){
+  pick.kind = kind;
+  document.querySelectorAll("#model-form .pick[data-kind]").forEach(p=>{
+    const on = p.dataset.kind===kind;
+    p.classList.toggle("on", on);
+    p.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  /* 生成规格：图像显示尺寸块，视频显示清晰度/时长块 */
+  el("mf-spec-image").style.display = (kind==="image") ? "" : "none";
+  el("mf-spec-video").style.display = (kind==="video") ? "" : "none";
+  onVendorPick();
+}
+
+/* 图像尺寸：选了「自定义…」才显示手填框 */
+function onSizePresetChange(){
+  const custom = el("mf-size-preset").value === "custom";
+  el("mf-size-custom").style.display = custom ? "" : "none";
+  if(custom) el("mf-size-custom").focus();
+}
+
+function collectModelPayload(){
+  const vendor = el("mf-vendor").value;
+  /* 编辑手写层里的模型时厂商是空的，这是允许的 —— 后端会沿用它的 provider。 */
+  if(!vendor && !pick.editingModel) throw new Error("请先选择厂商");
+  const name = el("mf-model").value.trim();
+  if(!name) throw new Error("请填写模型名称");
+  const kind = pick.kind;
+  const supports = [kind==="image" ? "text2img" : "text2video"];
+  if(el("mf-extra").checked) supports.push(kind==="image" ? "img2img" : "img2video");
+  /* ④ 生成规格 → params。表单管辖的键始终提交：空串表示"清掉这个键"（回到平台默认），
+     后端 upsert_model 的合并规则靠这个语义实现"取消指定尺寸"。 */
+  const params = {};
+  if(kind==="image"){
+    let size = el("mf-size-preset").value;
+    if(size==="custom"){
+      size = el("mf-size-custom").value.trim().toLowerCase().replace(/\s+/g,"").replace(/[*×]/g,"x");
+      if(size && !/^\d{2,5}x\d{2,5}$/.test(size)) throw new Error("自定义尺寸格式应为 宽x高，例如 1664x928");
+    }
+    params.size = size || "";
+  }else if(kind==="video"){
+    params.resolution = el("mf-resolution").value || "";
+    params.duration = el("mf-duration").value ? parseInt(el("mf-duration").value,10) : "";
+  }
+  return {
+    id: el("mf-id").value || "",
+    vendor: vendor,
+    model: name,
+    label: el("mf-label").value.trim(),
+    kind: kind,
+    priority: parseInt(el("mf-priority").value||"1",10),
+    weight: parseFloat(el("mf-weight").value||"50"),
+    enabled: true,
+    supports: supports,
+    params: params
+  };
+}
+
+async function saveModel(){
+  const btn = el("btn-save-model");
+  btn.disabled = true;
+  try{
+    const res = await api("/api/model", {method:"POST", body:JSON.stringify(collectModelPayload())});
+    await loadAll();
+    showModelForm(null);
+    showToast(res.message || "模型已保存");
+  }catch(e){ showError("保存失败："+e.message); }
+  finally{ btn.disabled = false; }
+}
+
+async function testModel(deep, box, payload){
+  box.innerHTML = '<div class="note"><span class="spin"></span>'+
+    (deep?"正在真实生成一次，请稍等（会消耗额度）…":"正在测试…（不会生成任何内容，不消耗额度）")+'</div>';
+  try{
+    const res = await api("/api/model/test", {method:"POST", body:JSON.stringify(Object.assign({},payload,{deep:deep}))});
+    if(deep){
+      let html = '<div class="note '+(res.ok?"":"err")+'"><span class="badge '+(res.ok?"ok":"err")+'">'+
+        (res.ok?"试生成成功":"试生成失败")+'</span> '+esc(res.ok ? "这个模型确实可以用了。" : (res.error||""))+'</div>';
+      if(res.hint) html += '<div class="hint">'+esc(res.hint)+'</div>';
+      if(res.note) html += '<div class="hint">'+esc(res.note)+'</div>';
+      if(res.files && res.files.length){
+        const f = res.files[0];
+        html += '<div class="hint mono" style="margin-top:8px">'+esc(f)+'</div>';
+        const low = String(f).toLowerCase();
+        if(/\.(png|jpe?g|webp|gif)$/.test(low)){
+          html += '<img class="preview" src="/api/file?path='+encodeURIComponent(f)+'&t='+encodeURIComponent(TOKEN)+'" alt="试生成结果">';
+        }else if(/\.(mp4|webm)$/.test(low)){
+          html += '<video class="preview" controls src="/api/file?path='+encodeURIComponent(f)+'&t='+encodeURIComponent(TOKEN)+'"></video>';
+        }
+      }
+      box.innerHTML = html;
+    }else{
+      renderChecks(box, res);
+    }
+  }catch(e){
+    box.innerHTML = '<div class="note err">测试失败：'+esc(e.message)+'</div>';
+  }
+}
+
+/* ------------------------------------------------------------------ 事件 */
+let toastTimer = null;
+function showToast(msg){
+  let t = el("toast");
+  if(!t){
+    t = document.createElement("div");
+    t.id = "toast";
+    t.style.cssText = "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);"+
+      "background:#1f2328;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;"+
+      "z-index:99;opacity:0;transition:opacity .2s";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(()=>{ t.style.opacity = "1"; });
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.style.opacity = "0"; }, 2400);
+}
+
+/* 错误提示：替代 alert()。alert 是阻塞式系统弹窗，会打断操作、样式割裂、
+   长文案还被截断。这里用页面内的非阻塞红条，支持多行、可手动关闭、
+   停留更久（错误信息用户需要时间读）。 */
+let errTimer = null;
+function showError(msg){
+  let t = el("err-toast");
+  if(!t){
+    t = document.createElement("div");
+    t.id = "err-toast";
+    t.setAttribute("role", "alert");
+    document.body.appendChild(t);
+  }
+  t.innerHTML = '<button class="x" type="button" aria-label="关闭">×</button>'+esc(msg);
+  t.querySelector(".x").addEventListener("click", hideError);
+  t.classList.add("show");
+  clearTimeout(errTimer);
+  /* 长文案给更长的阅读时间；6 秒后自动淡出 */
+  errTimer = setTimeout(hideError, 6000);
+}
+function hideError(){
+  const t = el("err-toast");
+  if(t) t.classList.remove("show");
+  clearTimeout(errTimer);
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on", x===t));
+    document.querySelectorAll(".panel").forEach(p=>{
+      p.classList.toggle("on", p.id === "panel-"+t.dataset.tab);
+    });
+  });
+});
+
+el("btn-add-vendor").addEventListener("click", ()=>showVendorForm(null));
+el("btn-cancel-vendor").addEventListener("click", ()=>{ el("vendor-form").style.display="none"; });
+el("btn-save-vendor").addEventListener("click", saveVendor);
+el("btn-test-vendor").addEventListener("click", ()=>{
+  testVendor({box:el("vf-result"), kind:"image"});
+});
+/* 选中一个厂商卡片。click 和键盘（回车/空格）共用这一段，避免两处逻辑各写各的。 */
+function selectProvider(pkey){
+  pick.catalog_key = pkey;
+  renderProviderGrid();
+  el("vf-fields").style.display = "block";
+  const c = catalogEntry(pick.catalog_key);
+  el("vf-ep-image").value = (c.endpoints && c.endpoints.image) || "";
+  el("vf-ep-video").value = (c.endpoints && c.endpoints.video) || "";
+  renderKeyFields(pick.editingVendor ? vendorById(pick.editingVendor) : null);
+}
+el("provider-grid").addEventListener("click", ev=>{
+  const card = ev.target.closest(".pick[data-pkey]");
+  if(card) selectProvider(card.dataset.pkey);
+});
+/* 卡片是 div 不是 button，键盘默认不触发 click，必须自己接回车/空格。 */
+el("provider-grid").addEventListener("keydown", ev=>{
+  if(ev.key !== "Enter" && ev.key !== " " && ev.key !== "Spacebar") return;
+  const card = ev.target.closest(".pick[data-pkey]");
+  if(!card) return;
+  ev.preventDefault();  /* 空格否则会让页面滚动 */
+  selectProvider(card.dataset.pkey);
+});
+
+/* 列表里的事件处理是 async 的：里面抛异常会变成一个无人处理的 rejected promise，
+   页面表现就是"点了没反应"，控制台里才有线索。统一包一层，出问题直接说出来。 */
+async function guarded(label, fn){
+  try{ return await fn(); }
+  catch(e){
+    console.error("["+label+"] 失败:", e);
+    showError(label+"失败："+(e && e.message ? e.message : e));
+  }
+}
+
+el("vendor-list").addEventListener("click", ev => guarded("厂商操作", async ()=>{
+  const btn = ev.target.closest("button[data-act]");
+  if(!btn) return;
+  const vid = btn.dataset.vid;
+  const act = btn.dataset.act;
+  if(act==="edit-vendor"){ showVendorForm(vendorById(vid)); return; }
+  if(act==="del-vendor"){
+    const v = vendorById(vid);
+    const n = (v && v.model_count) || 0;
+    const extra = n ? "引用它的 "+n+" 个模型会一起被删除。" : "";
+    if(!confirm("删除厂商「"+((v&&(v.label||v.id))||vid)+"」？"+extra+"此操作不可撤销。")) return;
+    const res = await api("/api/vendor?id="+encodeURIComponent(vid), {method:"DELETE"});
+    await loadAll();
+    showToast(res.message || "厂商已删除");
+    return;
+  }
+  if(act==="test-vendor"){
+    const v = vendorById(vid);
+    const e = catalogEntry(v.catalog || v.provider);
+    const kind = (e && e.kinds[0]) || "image";
+    const item = btn.closest(".mitem");
+    const box = resultBoxAfter(item, "vendor:"+vid);
+    await testVendor({box:box, kind:kind, vendorId:vid, saved:true});
+  }
+}));
+
+el("btn-add-model").addEventListener("click", ()=>showModelForm(null));
+el("btn-cancel-model").addEventListener("click", ()=>{ el("model-form").style.display="none"; });
+el("btn-save-model").addEventListener("click", saveModel);
+el("mf-vendor").addEventListener("change", onVendorPick);
+el("mf-size-preset").addEventListener("change", onSizePresetChange);
+el("mf-weight-range").addEventListener("input", ()=>{
+  el("mf-weight").value = el("mf-weight-range").value;
+  el("mf-w-label").textContent = el("mf-weight-range").value;
+});
+el("mf-weight").addEventListener("input", ()=>{
+  const v = parseFloat(el("mf-weight").value||"0");
+  el("mf-weight-range").value = Math.min(100, Math.max(1, v||1));
+  el("mf-w-label").textContent = el("mf-weight").value;
+});
+document.querySelectorAll("#model-form .pick[data-kind]").forEach(p=>{
+  p.addEventListener("click", ()=>setKind(p.dataset.kind));
+  /* 同厂商卡片：div 充当按钮，键盘默认不触发，需自己接回车/空格 */
+  p.addEventListener("keydown", ev=>{
+    if(ev.key !== "Enter" && ev.key !== " " && ev.key !== "Spacebar") return;
+    ev.preventDefault();
+    setKind(p.dataset.kind);
+  });
+});
+el("btn-test-model").addEventListener("click", ()=>{
+  try{ testModel(false, el("mf-result"), collectModelPayload()); }
+  catch(e){ showError(e.message); }
+});
+el("model-list").addEventListener("click", ev => guarded("模型操作", async ()=>{
+  const btn = ev.target.closest("button[data-act]");
+  if(!btn) return;
+  const mid = btn.dataset.mid;
+  const act = btn.dataset.act;
+  if(act==="edit-model"){
+    showModelForm(findModelById(mid));
+    return;
+  }
+  if(act==="del-model"){
+    /* 删除前用页面内弹窗确认一次。误删虽可以重新添加恢复，但 tombstone 会
+       把手写层同名模型也压住，还是先问一句更稳妥。 */
+    const m = findModelById(mid);
+    const name = (m && (m.label || m.model)) || mid;
+    const fromBase = m && m.from_base;
+    const ok = await uiConfirm(
+      fromBase ? "隐藏手写层模型" : "删除模型",
+      fromBase
+        ? "「"+name+"」写在 models.yaml 手写层里，删除只是加一条覆盖记录把它藏起来（改回 models.yaml 可恢复）。确定隐藏吗？"
+        : "确定删除「"+name+"」吗？误删后重新添加同名模型可以恢复。",
+      fromBase ? "隐藏" : "删除"
+    );
+    if(!ok) return;
+    try{
+      const res = await api("/api/model?id="+encodeURIComponent(mid), {method:"DELETE"});
+      await loadAll();
+      showToast(res.message || "已删除");
+    }catch(e){ showError("删除失败："+e.message); }
+    return;
+  }
+  if(act==="test-model"){
+    const found = findModelById(mid);
+    if(!found) return;
+    const box = resultBoxAfter(btn.closest(".mitem"), "model:"+mid);
+    await testModel(false, box, {id:mid});
+  }
+}));
+el("model-list").addEventListener("change", ev => guarded("切换模型状态", async ()=>{
+  const cb = ev.target.closest('input[data-act="toggle-model"]');
+  if(!cb) return;
+  await api("/api/model/toggle", {method:"POST", body:JSON.stringify({id:cb.dataset.mid, enabled:cb.checked})});
+  await loadAll();
+}));
+
+renderModelGroups();
+loadAll().catch(e=>{
+  document.body.insertAdjacentHTML("afterbegin",
+    '<div class="wrap"><div class="note err">加载配置失败：'+esc(e.message)+'</div></div>');
+});
+</script>
+</body>
+</html>

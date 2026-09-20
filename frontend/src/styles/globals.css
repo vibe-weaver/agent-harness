@@ -1,0 +1,435 @@
+@import "tailwindcss";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/700.css";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+:root {
+  --bg: #FCF9F2;
+  --text-primary: #111111;
+  --text-secondary: #726960;
+  --text-tertiary: #999999;
+  --accent: #986638;
+  --line: #EBE5DB;
+  --header-bg: rgba(252, 249, 242, 0.85);
+  --code-bg: rgba(152, 102, 56, 0.06);
+  --code-text: #986638;
+  --card-bg: rgba(255,255,255,0.65);
+  --card-bg-medium: rgba(255,255,255,0.6);
+  --card-bg-strong: rgba(255,255,255,0.7);
+  --card-bg-solid: rgba(255,255,255,0.85);
+  --surface-bg: rgba(255,255,255,0.5);
+  --surface-light: rgba(255,255,255,0.3);
+  --postcard-bg: rgba(200,218,230,0.45);
+  --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
+  --card-gradient-strong: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+  --card-hover-gradient: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(152,102,56,0.04) 100%);
+  --inset-highlight: rgba(255,255,255,0.6);
+  --inset-highlight-strong: rgba(255,255,255,0.8);
+}
+
+.dark {
+  --bg: #131210;
+  --text-primary: #f2eada;
+  --text-secondary: #b5a794;
+  --text-tertiary: #847866;
+  --accent: #e0b07a;
+  --line: #2e2823;
+  --header-bg: rgba(19, 18, 16, 0.9);
+  --code-bg: rgba(224, 176, 122, 0.1);
+  --code-text: #e0b07a;
+  --card-bg: rgba(242, 234, 218, 0.07);
+  --card-bg-medium: rgba(242, 234, 218, 0.06);
+  --card-bg-strong: rgba(242, 234, 218, 0.08);
+  --card-bg-solid: rgba(242, 234, 218, 0.11);
+  --surface-bg: rgba(242, 234, 218, 0.05);
+  --surface-light: rgba(242, 234, 218, 0.03);
+  --postcard-bg: rgba(242, 234, 218, 0.06);
+  --card-gradient: linear-gradient(135deg, rgba(242,234,218,0.08) 0%, rgba(242,234,218,0.02) 100%);
+  --card-gradient-strong: linear-gradient(135deg, rgba(242,234,218,0.09) 0%, rgba(242,234,218,0.03) 100%);
+  --card-hover-gradient: linear-gradient(135deg, rgba(242,234,218,0.08) 0%, rgba(224,176,122,0.07) 100%);
+  --inset-highlight: rgba(242, 234, 218, 0.06);
+  --inset-highlight-strong: rgba(242, 234, 218, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,252,247,0.4) 0%, rgba(247,243,236,0) 70%),
+    var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.dark body {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(224,176,122,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 70%, rgba(152,102,56,0.04) 0%, transparent 50%),
+    var(--bg);
+}
+
+::selection { background: rgba(152, 102, 56, 0.2); }
+
+/* 用户消息气泡 — 选中文字时使用高对比配色 */
+.user-bubble::selection { background: rgba(0, 0, 0, 0.35); color: #fff; }
+.user-bubble ::selection { background: rgba(0, 0, 0, 0.35); color: #fff; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+/* ============================================================
+   性能优化 — 离屏内容跳过渲染 + GPU 合成层优化
+   ============================================================ */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
+/* 所有无限循环 CSS 动画的元素走合成层，避免主线程重绘 */
+[style*="animation"],
+[class*="dsh-"] {
+  will-change: transform, opacity;
+}
+
+/* 含 3D 变换的元素提升为合成层 */
+[style*="preserve-3d"],
+[style*="translateZ"],
+[style*="perspective"] {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* backdrop-filter 元素提示浏览器合成 */
+[style*="backdrop-filter"],
+[style*="WebkitBackdropFilter"] {
+  will-change: transform;
+}
+
+/* ============================================================
+   全局 CSS keyframes — 替代 framer-motion 无限动画
+   所有无限循环动画走 CSS 合成层，释放 JS 主线程
+   ============================================================ */
+@keyframes css-spin-cw { to { transform: rotate(360deg); } }
+@keyframes css-spin-ccw { to { transform: rotate(-360deg); } }
+@keyframes css-spin-y { to { transform: rotateY(360deg); } }
+@keyframes css-spin-3d { to { transform: rotateX(360deg) rotateY(360deg); } }
+@keyframes dsh-spin { to { transform: rotate(360deg); } }
+
+/* ══ DSH 风格工具行扫光动画 ══
+   借鉴 DSH ToolRow.module.css 的 dsh-tool-row-sweep:
+   一道半透明光带从左到右扫过行，传达"正在执行"的视觉信号 */
+@keyframes dsh-tool-sweep {
+  0% { left: -300px; }
+  90%, 100% { left: 100%; }
+}
+
+/* 减弱动画偏好：尊重用户无障碍设置 */
+@media (prefers-reduced-motion: reduce) {
+  .dsh-tool-row-root[data-state='running'] > span:first-of-type {
+    animation: none !important;
+  }
+}
+
+@keyframes css-glow {
+  0%,100% { transform: scale(1); opacity: 0.06; }
+  50% { transform: scale(1.12); opacity: 0.1; }
+}
+@keyframes css-particle {
+  0% { transform: translate(0,0); opacity: 0; }
+  33% { transform: translate(var(--x1,0px),-25px); opacity: 0.35; }
+  66% { transform: translate(var(--x2,0px),-50px); opacity: 0.15; }
+  100% { transform: translate(0,0); opacity: 0; }
+}
+@keyframes css-float-y {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(var(--fy,-12px)); }
+}
+@keyframes css-float-y-rot {
+  0%,100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(var(--fy,-12px)) rotate(360deg); }
+}
+@keyframes css-quill {
+  0%,100% { transform: rotate(-8deg) translateY(0); }
+  50% { transform: rotate(5deg) translateY(-6px); }
+}
+@keyframes css-bottle {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes css-ink-surface {
+  0%,100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.06); }
+}
+@keyframes css-ink-drop {
+  0% { transform: translate(0,0) scale(1); opacity: 0.8; }
+  50% { transform: translate(var(--dx),var(--dy)) scale(0.6); opacity: 0.4; }
+  100% { transform: translate(calc(var(--dx)*1.5),calc(var(--dy)*1.2)) scale(0.2); opacity: 0; }
+}
+@keyframes css-ink-sym {
+  0% { transform: translate(0,0) rotate(0) scale(0.6); opacity: 0; }
+  50% { transform: translate(var(--dx),-60px) rotate(var(--rot)) scale(1); opacity: 0.5; }
+  100% { transform: translate(calc(var(--dx)*1.8),-110px) rotate(calc(var(--rot)*2)) scale(0.8); opacity: 0; }
+}
+@keyframes css-star {
+  0%,100% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1); opacity: 0.6; }
+}
+@keyframes css-shadow {
+  0%,100% { transform: translateX(-50%) scaleX(1); opacity: 0.1; }
+  50% { transform: translateX(-50%) scaleX(1.1); opacity: 0.18; }
+}
+@keyframes css-scroll-dot {
+  0%,100% { transform: scale(0.5); opacity: 0.3; }
+  50% { transform: scale(1); opacity: 0.7; }
+}
+@keyframes css-dot-pulse {
+  0%,100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+@keyframes css-title-pulse { 0%,100%{opacity:0.3} 50%{opacity:0.6} }
+@keyframes css-orbit-glow {
+  0%,100% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes css-center-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+@keyframes css-cta-pulse {
+  0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0.06; }
+  100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
+}
+@keyframes css-flow-line {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(200%); }
+}
+@keyframes css-pulse-soft {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+@keyframes css-blink {
+  0%,90%,100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.2); }
+}
+@keyframes cursor-blink {
+  0%,49% { opacity: 1; }
+  50%,100% { opacity: 0; }
+}
+@keyframes cursor-pulse {
+  0%,100% { opacity: 0.9; transform: scaleY(1); }
+  50% { opacity: 0.3; transform: scaleY(0.85); }
+}
+@keyframes css-scan-line {
+  from { transform: translateY(-20px); }
+  to { transform: translateY(500px); }
+}
+@keyframes css-sway {
+  0%,100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes css-breathe {
+  0%,100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.08); opacity: 0.7; }
+}
+@keyframes css-float-tilt {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+
+/* ══ 骨架屏 shimmer — 加载占位（第一期去装饰化：替代 3D 旋转环/扫光动画）══
+   从左到右的光带扫过占位块，背景色全走 CSS 变量，暗色自动跟随 */
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ══ 全局键盘焦点态 — 大厂 baseline 的可访问性 ══
+   只给键盘 Tab 用户显示（:focus-visible 不会匹配鼠标点击），
+   鼠标用户的点击体验不受影响 */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="skeleton-shimmer"] { animation: none !important; }
+}
+
+/* ============================================================
+   DSH 风格动画 — 仿 DeepSeek Harness 桌面端
+   ============================================================ */
+@keyframes dsh-shimmer {
+  to { background-position: 0 0; }
+}
+
+@keyframes dsh-pulse-soft {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* 鱼标志游动动画 — 仿 DSH 桌面端 hero-fish-swim */
+@keyframes dsh-fish-swim {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  35% { transform: translate(-1px, -1px) rotate(-5deg); }
+  70% { transform: translate(1px, 0) rotate(3deg); }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .dsh-fish-hitbox:hover .dsh-fish {
+    animation: dsh-fish-swim 0.6s ease-in-out;
+  }
+}
+
+/* 3D 鱼标志 — Hero 页面动态效果 */
+@keyframes dsh-fish-3d {
+  0%, 100% { transform: perspective(400px) rotateY(0deg) translateY(0px) scale(1); }
+  25% { transform: perspective(400px) rotateY(-8deg) translateY(-4px) scale(1.02); }
+  50% { transform: perspective(400px) rotateY(0deg) translateY(-8px) scale(1.04); }
+  75% { transform: perspective(400px) rotateY(8deg) translateY(-4px) scale(1.02); }
+}
+
+@keyframes dsh-fish-glow-pulse {
+  0%, 100% { opacity: 0.06; transform: translate(-50%, 50%) scale(1); }
+  50% { opacity: 0.12; transform: translate(-50%, 50%) scale(1.15); }
+}
+
+@keyframes dsh-hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.dsh-fish-3d {
+  animation: dsh-fish-3d 4s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+
+.dsh-hero-glow-pulse {
+  animation: dsh-fish-glow-pulse 3s ease-in-out infinite;
+}
+
+.dsh-hero-float {
+  animation: dsh-hero-float 3s ease-in-out infinite;
+}
+
+/* DSH 动画类已移除 — 静态渲染减少 GPU 开销 */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   代码高亮 — 自定义浅色主题（替代 github-dark，适配浅色页面）
+   深色模式（.dark）下自动切换为深色配色
+   ============================================================ */
+.hljs {
+  color: #3b322c;               /* 基础文本：暖深棕 */
+  background: transparent;
+}
+.hljs-comment,
+.hljs-quote { color: #9c8f7f; font-style: italic; }          /* 注释 */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-type { color: #a0522d; }                                /* 关键字：陶土红 */
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute { color: #7a6a3d; }                          /* 字符串：橄榄棕 */
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link { color: #b06a2e; }                                /* 数字：琥珀 */
+.hljs-title,
+.hljs-section,
+.hljs-function .hljs-title,
+.hljs-title.function_ { color: #7c6a3e; font-weight: 600; }   /* 函数名 */
+.hljs-title.class_,
+.hljs-selector-class,
+.hljs-selector-id { color: #8a6d3b; }                          /* 类名 */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params { color: #5a5148; }                               /* 变量 */
+.hljs-built_in,
+.hljs-name,
+.hljs-meta { color: #9a6a2a; }                                 /* 内建 */
+.hljs-attr,
+.hljs-selector-attr,
+.hljs-selector-pseudo { color: #7a6a3d; }
+.hljs-deletion { color: #b04a3a; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+
+.dark .hljs {
+  color: #d8c9b2;               /* 基础文本：暖米白 */
+}
+.dark .hljs-comment,
+.dark .hljs-quote { color: #7d7160; }
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-literal,
+.dark .hljs-type { color: #e09870; }
+.dark .hljs-string,
+.dark .hljs-regexp,
+.dark .hljs-addition,
+.dark .hljs-attribute { color: #b8a878; }
+.dark .hljs-number,
+.dark .hljs-symbol,
+.dark .hljs-bullet,
+.dark .hljs-link { color: #e0a060; }
+.dark .hljs-title,
+.dark .hljs-section,
+.dark .hljs-function .hljs-title,
+.dark .hljs-title.function_ { color: #c8b060; }
+.dark .hljs-title.class_,
+.dark .hljs-selector-class,
+.dark .hljs-selector-id { color: #c0a868; }
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-params { color: #c0b5a5; }
+.dark .hljs-built_in,
+.dark .hljs-name,
+.dark .hljs-meta { color: #d0a060; }
+.dark .hljs-deletion { color: #e07058; }
+
+/* ══ 聊天区 AI 回复 Markdown 排版（.dsh-chat-md 作用域）══
+   链接 / 表格边框 / 断行质量：这些规则需要伪类或 :last-child，
+   内联样式表达不了，统一收在这里。 */
+
+/* 链接：默认无下划线，hover 加深+下划线（可点击性反馈） */
+.dsh-chat-md a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.dsh-chat-md a:hover {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text-primary));
+  text-decoration: underline;
+}
+
+/* 断行质量：段落/列表项避免孤行，标题两侧均衡（旧浏览器自动忽略） */
+.dsh-chat-md p,
+.dsh-chat-md li { text-wrap: pretty; }
+.dsh-chat-md h1, .dsh-chat-md h2, .dsh-chat-md h3,
+.dsh-chat-md h4, .dsh-chat-md h5, .dsh-chat-md h6 { text-wrap: balance; }
+
+/* 三线表：表头 2px 底线、行间 1px 细线、末行去线、偶数行斑马纹补行对齐感 */
+.dsh-chat-md thead th { border-bottom: 2px solid var(--line); }
+.dsh-chat-md tbody td { border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.dsh-chat-md tbody tr:last-child td { border-bottom: none; }
+.dsh-chat-md tbody tr:nth-child(even) { background: color-mix(in srgb, var(--code-bg) 45%, transparent); }

@@ -1,0 +1,21 @@
+[Unit]
+Description=每分钟黑盒探测 B 的沙箱 healthz
+Documentation=file:/opt/sandbox-executor/sandbox-healthz-probe.service
+
+[Timer]
+Unit=sandbox-healthz-probe.service
+
+# 开机 2 分钟后开始 —— A 自己的服务（blog/nfs-server）要优先起来，
+# 探测器抢在前面对 B 发起请求没有意义。
+OnBootSec=2min
+OnUnitActiveSec=1min
+
+# 探测的价值在于"故障窗口分钟级"，周期即上限 —— 不给 AccuracySec 留弹性，
+# 默认 1min 的聚合就已经是能接受的毛边。
+AccuracySec=1s
+
+# 不加 Persistent=true：漏掉的探测没有补跑的价值（healthz 是瞬时状态，
+# 补跑一个旧时间点的探测毫无意义），重启后按新周期开始即可。
+
+[Install]
+WantedBy=timers.target
